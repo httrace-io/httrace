@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Httrace — Your users write your tests.</title>
+<meta name="description" content="Httrace captures real production traffic and automatically generates integration tests — without you writing a single line.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080808;
+    --bg-2: #0e0e0e;
+    --bg-3: #141414;
+    --bg-4: #1a1a1a;
+    --border: #1f1f1f;
+    --border-2: #2a2a2a;
+    --text: #f0f0f0;
+    --text-muted: #666;
+    --text-dim: #999;
+    --accent: #3b82f6;
+    --accent-dim: rgba(59,130,246,0.12);
+    --accent-glow: rgba(59,130,246,0.25);
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  h1, h2, h3, h4 { font-family: var(--font-display); line-height: 1.1; letter-spacing: -0.02em; }
+
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 120px 0; }
+
+  /* ── FADE IN ── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+  .fade-up.delay-1 { transition-delay: 0.1s; }
+  .fade-up.delay-2 { transition-delay: 0.2s; }
+  .fade-up.delay-3 { transition-delay: 0.3s; }
+  .fade-up.delay-4 { transition-delay: 0.4s; }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.3s, background 0.3s, backdrop-filter 0.3s;
+  }
+  nav.scrolled {
+    border-color: var(--border);
+    background: rgba(8,8,8,0.85);
+    backdrop-filter: blur(16px);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.03em;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--accent);
+    color: #fff !important;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    transition: opacity 0.2s !important;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  #hero {
+    padding-top: 180px;
+    padding-bottom: 100px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+    opacity: 0.4;
+  }
+  .hero-glow {
+    position: absolute;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 600px;
+    background: radial-gradient(ellipse, rgba(59,130,246,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; text-align: center; }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-2);
+    background: var(--bg-2);
+    border-radius: 100px;
+    padding: 6px 14px;
+    margin-bottom: 40px;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .hero-badge-dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  h1.hero-title {
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+  .hero-sub {
+    font-size: clamp(16px, 2.5vw, 20px);
+    color: var(--text-dim);
+    max-width: 560px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+    line-height: 1.7;
+  }
+  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 0 0 var(--accent-glow);
+    transition: box-shadow 0.3s, opacity 0.2s;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 40px 8px var(--accent-glow);
+    opacity: 0.92;
+  }
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    padding: 13px 28px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 400;
+    text-decoration: none;
+    border: 1px solid var(--border-2);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-secondary:hover { color: var(--text); border-color: #444; }
+
+  /* ── CODE COMPARE ── */
+  .code-compare {
+    margin-top: 72px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--border);
+    text-align: left;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .code-pane {
+    background: var(--bg-2);
+    padding: 0;
+    overflow: hidden;
+  }
+  .code-pane-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-3);
+  }
+  .code-pane-header .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .code-pane-header .title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    margin-left: 4px;
+  }
+  .pane-before .code-pane-header .title { color: var(--text-muted); }
+  .pane-after .code-pane-header .title { color: var(--accent); }
+  .pane-before { opacity: 0.55; }
+  .code-body {
+    padding: 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.8;
+    min-height: 220px;
+  }
+
+  /* syntax colors */
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .st { color: #c3e88d; }
+  .cm { color: #546e7a; font-style: italic; }
+  .nu { color: #f78c6c; }
+  .py { color: var(--text-dim); }
+  .ac { color: var(--accent); }
+  .gn { color: var(--green); }
+  .strikethrough { text-decoration: line-through; opacity: 0.5; }
+
+  /* ── SECTION TITLES ── */
+  .section-label { margin-bottom: 16px; }
+  .section-title {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 18px;
+    color: var(--text-muted);
+    max-width: 480px;
+    font-weight: 300;
+  }
+
+  /* ── PROBLEM SECTION ── */
+  #problem { background: var(--bg); }
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--border);
+    margin-top: 60px;
+  }
+  .problem-card {
+    background: var(--bg-2);
+    padding: 40px 36px;
+    transition: background 0.2s;
+  }
+  .problem-card:hover { background: var(--bg-3); }
+  .problem-icon {
+    width: 44px; height: 44px;
+    margin-bottom: 24px;
+    color: var(--accent);
+  }
+  .problem-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .problem-card p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+  /* ── HOW IT WORKS ── */
+  #how { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 64px;
+    position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute;
+    top: 28px; left: calc(16.67% + 20px); right: calc(16.67% + 20px);
+    height: 1px;
+    background: linear-gradient(90deg, var(--accent), transparent 40%, transparent 60%, var(--accent));
+    border-top: 1px dashed var(--border-2);
+  }
+  .step { text-align: center; }
+  .step-num {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    border: 1px solid var(--border-2);
+    background: var(--bg-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--accent);
+    margin: 0 auto 24px;
+    position: relative;
+    z-index: 1;
+  }
+  .step h3 { font-size: 20px; font-weight: 700; margin-bottom: 12px; }
+  .step p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.7; }
+  .step-code {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    text-align: left;
+    line-height: 1.7;
+  }
+  .step-code .prompt { color: var(--text-muted); user-select: none; }
+  .step-code .cmd { color: var(--green); }
+  .step-code .arg { color: var(--text-dim); }
+
+  /* ── COMPARISON ── */
+  #compare { background: var(--bg); }
+  .compare-table-wrap {
+    margin-top: 60px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--bg-3); border-bottom: 1px solid var(--border); }
+  thead th {
+    padding: 16px 24px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+  }
+  thead th:first-child { text-align: left; color: var(--text-muted); font-weight: 400; font-family: var(--font-body); }
+  thead th.col-httrace {
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-left: 1px solid rgba(59,130,246,0.2);
+    border-right: 1px solid rgba(59,130,246,0.2);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg-2); }
+  tbody td {
+    padding: 16px 24px;
+    font-size: 14px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+  tbody td:first-child { text-align: left; color: var(--text); }
+  tbody td.col-httrace {
+    background: var(--accent-dim);
+    border-left: 1px solid rgba(59,130,246,0.1);
+    border-right: 1px solid rgba(59,130,246,0.1);
+  }
+  .check { color: var(--green); font-size: 18px; }
+  .cross { color: #333; font-size: 18px; }
+  .partial { color: var(--yellow); font-size: 13px; }
+
+  /* ── PRICING ── */
+  #pricing { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--border);
+    margin-top: 60px;
+  }
+  .pricing-card {
+    background: var(--bg);
+    padding: 36px 28px;
+    position: relative;
+    transition: background 0.2s;
+  }
+  .pricing-card:hover { background: var(--bg-3); }
+  .pricing-card.popular {
+    background: var(--bg-2);
+    border-top: 2px solid var(--accent);
+  }
+  .popular-badge {
+    position: absolute;
+    top: -1px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 0 0 6px 6px;
+  }
+  .pricing-tier {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .pricing-price {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+  .pricing-price .currency { font-size: 20px; vertical-align: super; }
+  .pricing-price .period { font-size: 14px; font-weight: 400; color: var(--text-muted); font-family: var(--font-body); }
+  .pricing-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; margin-top: 8px; }
+  .pricing-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+  .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .pricing-features li {
+    font-size: 13px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .pricing-features li::before {
+    content: '—';
+    color: var(--accent);
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+  }
+
+  /* ── INVESTOR ── */
+  #investor { background: var(--bg); }
+  .investor-card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 72px 64px;
+    background: var(--bg-2);
+    position: relative;
+    overflow: hidden;
+  }
+  .investor-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .investor-card::after {
+    content: '';
+    position: absolute;
+    bottom: -150px; right: -150px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .stats-row {
+    display: flex;
+    gap: 0;
+    margin: 48px 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--border);
+  }
+  .stat {
+    flex: 1;
+    background: var(--bg-3);
+    padding: 32px 28px;
+    text-align: center;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-label { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+  .investor-p { font-size: 17px; color: var(--text-dim); max-width: 600px; line-height: 1.8; margin-bottom: 36px; font-weight: 300; }
+
+  /* ── WAITLIST ── */
+  #waitlist {
+    background: var(--bg-2);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 120px 0;
+  }
+  .waitlist-title { font-size: clamp(36px, 6vw, 72px); font-weight: 800; margin-bottom: 16px; }
+  .waitlist-sub { font-size: 17px; color: var(--text-muted); margin-bottom: 48px; font-weight: 300; }
+  .waitlist-form {
+    display: flex;
+    gap: 8px;
+    max-width: 440px;
+    margin: 0 auto 16px;
+  }
+  .waitlist-form input {
+    flex: 1;
+    background: var(--bg-3);
+    border: 1px solid var(--border-2);
+    border-radius: 8px;
+    padding: 13px 18px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .waitlist-form input:focus { border-color: var(--accent); }
+  .waitlist-form input::placeholder { color: var(--text-muted); }
+  .waitlist-note { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
+  .waitlist-success {
+    display: none;
+    color: var(--green);
+    font-size: 17px;
+    font-weight: 500;
+    padding: 16px 0;
+  }
+  .waitlist-success.show { display: block; }
+
+  /* ── HERO WAITLIST INLINE ── */
+  .hero-waitlist { margin-top: 40px; }
+  .hero-waitlist .waitlist-form { margin-bottom: 12px; }
+
+  /* ── SETUP GUIDE ── */
+  #setup { background: var(--bg); }
+  .setup-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 48px;
+    align-items: start;
+    margin-top: 64px;
+  }
+  .setup-steps { display: flex; flex-direction: column; gap: 0; }
+  .setup-step {
+    display: flex;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .setup-step:last-child { border-bottom: none; }
+  .setup-step-num {
+    flex-shrink: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border-2);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .setup-step.active .setup-step-num {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .setup-step-content h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-family: var(--font-body);
+  }
+  .setup-step-content p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .setup-preview {
+    position: sticky;
+    top: 80px;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .setup-preview-bar {
+    padding: 12px 16px;
+    background: var(--bg-3);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .setup-preview-bar span { color: var(--accent); }
+  .setup-panel {
+    display: none;
+    padding: 24px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text-dim);
+  }
+  .setup-panel.active { display: block; }
+  .setup-panel .hl-key { color: #f59e0b; }
+  .setup-panel .hl-str { color: #86efac; }
+  .setup-panel .hl-fn  { color: #93c5fd; }
+  .setup-panel .hl-kw  { color: #c084fc; }
+  .setup-panel .hl-ok  { color: var(--green); }
+  .setup-panel .hl-cm  { color: var(--text-muted); }
+  .setup-panel .hl-num { color: #fb923c; }
+  .setup-panel .prompt { color: var(--text-muted); user-select: none; }
+  .api-key-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin: 8px 0;
+  }
+  .api-key-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; }
+  @media (max-width: 768px) {
+    .setup-grid { grid-template-columns: 1fr; }
+    .setup-preview { position: static; }
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 32px 24px;
+  }
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-left { display: flex; flex-direction: column; gap: 4px; }
+  .footer-logo {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .footer-logo span { color: var(--accent); }
+  .footer-copy { font-size: 12px; color: var(--text-muted); }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 13px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    section { padding: 80px 0; }
+    nav { padding: 0 16px; }
+    .nav-links { display: none; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .steps::before { display: none; }
+    .pricing-grid { grid-template-columns: 1fr 1fr; }
+    .code-compare { grid-template-columns: 1fr; }
+    .code-compare .pane-before { display: block; opacity: 0.45; }
+    .code-body { font-size: 11px; min-height: 160px; overflow-x: auto; }
+    .code-compare { border-radius: 8px; }
+    .pane-before .code-pane-header .title::before { content: "Before "; }
+    .pane-after .code-pane-header .title::before { content: "After "; }
+    .investor-card { padding: 40px 24px; }
+    .stats-row { flex-direction: column; }
+    .footer-inner { flex-direction: column; gap: 24px; text-align: center; }
+    .waitlist-form { flex-direction: column; }
+  }
+  @media (max-width: 480px) {
+    .pricing-grid { grid-template-columns: 1fr; }
+    .hero-actions { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav id="nav">
+  <a href="#" class="nav-logo">htt<span>race</span></a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#compare">vs. Alternatives</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#waitlist" class="nav-cta">Join Waitlist</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-badge fade-up">
+        <span class="hero-badge-dot"></span>
+        Now in private beta — 200+ developers on waitlist
+      </div>
+      <h1 class="hero-title fade-up delay-1">Your users write<br>your tests.</h1>
+      <p class="hero-sub fade-up delay-2">Httrace captures real production traffic and automatically generates integration tests — without you writing a single line.</p>
+      <div class="hero-actions fade-up delay-3">
+        <a href="#waitlist" class="btn-primary">Join the Waitlist</a>
+        <a href="#how" class="btn-secondary">See how it works ↓</a>
+      </div>
+
+      <!-- Code compare -->
+      <div class="code-compare fade-up delay-4">
+        <div class="code-pane pane-before">
+          <div class="code-pane-header">
+            <span class="dot" style="background:#ef4444"></span>
+            <span class="dot" style="background:#f59e0b;margin-left:4px"></span>
+            <span class="dot" style="background:#22c55e;margin-left:4px"></span>
+            <span class="title">before_httrace.py — 8 hours later</span>
+          </div>
+          <div class="code-body">
+<span class="cm"># Writing this... manually. Again.</span>
+<span class="kw">def</span> <span class="fn">test_checkout_flow</span>():
+    <span class="cm"># Hope I didn't forget anything</span>
+    user = <span class="fn">create_mock_user</span>()
+    cart = <span class="fn">add_items_to_cart</span>([
+        <span class="st">"SKU-123"</span>, <span class="st">"SKU-456"</span>
+    ])
+    <span class="cm"># Did real users ever do this?</span>
+    resp = <span class="fn">client.post</span>(<span class="st">"/checkout"</span>,
+        json={<span class="st">"cart_id"</span>: cart.id})
+    <span class="cm"># Probably missing 40 edge cases</span>
+    <span class="kw">assert</span> resp.status_code == <span class="nu">200</span>
+          </div>
+        </div>
+        <div class="code-pane pane-after">
+          <div class="code-pane-header">
+            <span class="dot" style="background:#ef4444"></span>
+            <span class="dot" style="background:#f59e0b;margin-left:4px"></span>
+            <span class="dot" style="background:#22c55e;margin-left:4px"></span>
+            <span class="title">test_checkout_flow.py — auto-generated</span>
+          </div>
+          <div class="code-body">
+<span class="cm"># Generated by Httrace — 2026-04-18 09:14 UTC</span>
+<span class="cm"># Source: 3,412 real production requests</span>
+<span class="kw">def</span> <span class="fn">test_post_checkout_authenticated</span>():
+    <span class="cm"># Arrange — inferred from traffic chains</span>
+    auth = <span class="fn">create_test_user</span>(<span class="st">"standard_plan"</span>)
+    cart = <span class="fn">create_cart_with_items</span>([
+        <span class="st">"SKU-123"</span>, <span class="st">"SKU-456"</span>, <span class="st">"SKU-789"</span>
+    ])
+    <span class="kw">response</span> = client.post(<span class="st">"/checkout"</span>,
+        json={<span class="st">"cart_id"</span>: cart.id,
+              <span class="st">"payment_method"</span>: <span class="st">"card"</span>},
+        headers={<span class="st">"Authorization"</span>: auth.token})
+    <span class="kw">assert</span> response.status_code == <span class="nu">200</span>
+    <span class="kw">assert</span> <span class="st">"order_id"</span> <span class="kw">in</span> response.json()
+    <span class="kw">assert</span> response.json()[<span class="st">"status"</span>] == <span class="st">"confirmed"</span>
+<span class="gn">✓ 47 tests generated from this endpoint</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PROBLEM ── -->
+<section id="problem">
+  <div class="container">
+    <div class="fade-up">
+      <div class="label section-label">The problem</div>
+      <h2 class="section-title">Writing tests is the<br>worst part of shipping.</h2>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card fade-up delay-1">
+        <svg class="problem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <h3>8 hours writing tests that miss edge cases</h3>
+        <p>Developers spend entire sprints writing tests based on what they <em>think</em> users do. Real users always find something else.</p>
+      </div>
+      <div class="problem-card fade-up delay-2">
+        <svg class="problem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+        </svg>
+        <h3>Real users find bugs your tests never caught</h3>
+        <p>Your test suite passes. Production breaks. The scenario existed in your traffic logs the whole time — you just didn't know it.</p>
+      </div>
+      <div class="problem-card fade-up delay-3">
+        <svg class="problem-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17.5" r="0.75" fill="currentColor" stroke="none"/>
+        </svg>
+        <h3>New endpoints ship untested because no one has time</h3>
+        <p>Deadlines kill test coverage. Every "we'll add tests later" endpoint is a future incident waiting to happen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how">
+  <div class="container">
+    <div class="fade-up" style="text-align:center">
+      <div class="label section-label">How it works</div>
+      <h2 class="section-title">From production to test suite<br>in minutes.</h2>
+    </div>
+    <div class="steps">
+      <div class="step fade-up delay-1">
+        <div class="step-num">01</div>
+        <h3>Install</h3>
+        <p>Add Httrace to your Python project. One package, one line of code.</p>
+        <div class="step-code">
+          <span class="prompt">$</span> <span class="cmd">pip install httrace</span>
+        </div>
+      </div>
+      <div class="step fade-up delay-2">
+        <div class="step-num">02</div>
+        <h3>Capture</h3>
+        <p>Add the middleware to your app. Real traffic is captured, PII is removed automatically.</p>
+        <div class="step-code">
+<span class="kw">app</span>.add_middleware(<br>
+&nbsp;&nbsp;<span class="fn">HttraceCaptureMiddleware</span>,<br>
+&nbsp;&nbsp;<span class="arg">api_key</span>=<span class="st">"ht_..."</span>,<br>
+&nbsp;&nbsp;<span class="arg">sample_rate</span>=<span class="nu">0.1</span><br>
+)
+        </div>
+      </div>
+      <div class="step fade-up delay-3">
+        <div class="step-num">03</div>
+        <h3>Generate</h3>
+        <p>Run one command. Httrace writes real pytest files into your repo, ready to commit.</p>
+        <div class="step-code">
+          <span class="prompt">$</span> <span class="cmd">httrace generate</span><br>
+          <span class="gn">✓ 127 tests generated across 14 endpoints</span><br>
+          <span class="gn">✓ Written to ./tests/integration/</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SETUP GUIDE ── -->
+<section id="setup">
+  <div class="container">
+    <div class="fade-up" style="text-align:center">
+      <div class="label section-label">Get started</div>
+      <h2 class="section-title">Up and running<br>in under 5 minutes.</h2>
+      <p style="color:var(--text-muted);max-width:500px;margin:16px auto 0;font-size:16px;">Your API key unlocks everything. Here's exactly what happens after you join.</p>
+    </div>
+    <div class="setup-grid fade-up delay-1">
+
+      <!-- Left: steps -->
+      <div class="setup-steps" id="setupSteps">
+        <div class="setup-step active" data-panel="p1">
+          <div class="setup-step-num">1</div>
+          <div class="setup-step-content">
+            <h4>Join the waitlist — get your API key</h4>
+            <p>After signing up, you receive a personal <code style="color:var(--accent);font-family:var(--font-mono);font-size:12px">ht_</code> API key via email. It identifies your account and tracks your monthly usage against your plan.</p>
+          </div>
+        </div>
+        <div class="setup-step" data-panel="p2">
+          <div class="setup-step-num">2</div>
+          <div class="setup-step-content">
+            <h4>Install the SDK &amp; add one line</h4>
+            <p>Install via pip and register the middleware in your FastAPI, Flask, or Django app. The key goes in your environment variables — never hardcoded.</p>
+          </div>
+        </div>
+        <div class="setup-step" data-panel="p3">
+          <div class="setup-step-num">3</div>
+          <div class="setup-step-content">
+            <h4>Traffic flows in automatically</h4>
+            <p>Once the middleware is active, every real HTTP request is captured in the background. PII (emails, tokens, card numbers) is stripped before anything leaves your server.</p>
+          </div>
+        </div>
+        <div class="setup-step" data-panel="p4">
+          <div class="setup-step-num">4</div>
+          <div class="setup-step-content">
+            <h4>Generate tests with one command</h4>
+            <p>Run <code style="color:var(--accent);font-family:var(--font-mono);font-size:12px">httrace generate</code> from your project root. Httrace writes real pytest files to your repo — ready to commit and run in CI.</p>
+          </div>
+        </div>
+        <div class="setup-step" data-panel="p5">
+          <div class="setup-step-num">5</div>
+          <div class="setup-step-content">
+            <h4>Monitor coverage &amp; usage</h4>
+            <p>Use <code style="color:var(--accent);font-family:var(--font-mono);font-size:12px">httrace status</code> to see which endpoints are covered and how many captures remain in your monthly quota.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: code preview -->
+      <div class="setup-preview">
+        <div class="setup-preview-bar">
+          <span>●</span>&nbsp;
+          <span id="previewLabel">email from Httrace</span>
+        </div>
+
+        <div class="setup-panel active" id="p1">
+          <span class="hl-cm"># Welcome to Httrace!</span><br><br>
+          Your API key:<br>
+          <div class="api-key-pill"><div class="api-key-dot"></div>ht_Kx9mTqL2vRpN7wYdBcAeJf3Z</div><br>
+          Plan: <span class="hl-ok">Free</span> · 10 000 requests / month<br><br>
+          <span class="hl-cm"># Keep this key secret.</span><br>
+          <span class="hl-cm"># Store it as an env variable:</span><br><br>
+          <span class="prompt">$</span> export <span class="hl-key">HTTRACE_API_KEY</span>=<span class="hl-str">ht_Kx9mTqL2...</span>
+        </div>
+
+        <div class="setup-panel" id="p2">
+          <span class="prompt">$</span> <span class="hl-ok">pip install httrace</span><br><br>
+          <span class="hl-cm"># In your app (FastAPI example):</span><br><br>
+          <span class="hl-kw">import</span> os<br>
+          <span class="hl-kw">from</span> httrace <span class="hl-kw">import</span> <span class="hl-fn">HttraceCaptureMiddleware</span><br><br>
+          app.add_middleware(<br>
+          &nbsp;&nbsp;<span class="hl-fn">HttraceCaptureMiddleware</span>,<br>
+          &nbsp;&nbsp;api_key=os.environ[<span class="hl-str">"HTTRACE_API_KEY"</span>],<br>
+          &nbsp;&nbsp;service=<span class="hl-str">"my-api"</span>,<br>
+          &nbsp;&nbsp;sample_rate=<span class="hl-num">0.1</span>,  <span class="hl-cm"># capture 10%</span><br>
+          )
+        </div>
+
+        <div class="setup-panel" id="p3">
+          <span class="hl-cm"># Your app runs normally.</span><br>
+          <span class="hl-cm"># Httrace captures in the background.</span><br><br>
+          POST /orders &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl-ok">→ captured</span><br>
+          GET  /products/42 <span class="hl-ok">→ captured</span><br>
+          POST /auth/login &nbsp;<span class="hl-ok">→ captured (PII stripped)</span><br>
+          GET  /health &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="hl-cm">→ skipped (excluded)</span><br><br>
+          <span class="hl-cm"># No impact on response time.</span><br>
+          <span class="hl-cm"># Queue: 0 ms overhead on your requests.</span>
+        </div>
+
+        <div class="setup-panel" id="p4">
+          <span class="prompt">$</span> <span class="hl-ok">httrace generate</span><br><br>
+          &nbsp;&nbsp;<span class="hl-ok">✓</span> tests/integration/test_post_orders.py &nbsp;<span class="hl-cm">(3 tests)</span><br>
+          &nbsp;&nbsp;<span class="hl-ok">✓</span> tests/integration/test_get_products.py <span class="hl-cm">(5 tests)</span><br>
+          &nbsp;&nbsp;<span class="hl-ok">✓</span> tests/integration/test_post_auth.py &nbsp;&nbsp;<span class="hl-cm">(2 tests)</span><br><br>
+          <span class="hl-ok">✓ 10 tests across 3 endpoints</span><br><br>
+          <span class="prompt">$</span> <span class="hl-ok">pytest tests/integration/</span><br>
+          <span class="hl-ok">........&nbsp;&nbsp;10 passed in 0.84s</span>
+        </div>
+
+        <div class="setup-panel" id="p5">
+          <span class="prompt">$</span> <span class="hl-ok">httrace status</span><br><br>
+          Coverage — my-api<br>
+          ─────────────────────────────────<br>
+          POST &nbsp;/orders &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl-ok">38 captures</span> &nbsp;200 201 422<br>
+          GET &nbsp;&nbsp;/products &nbsp;&nbsp;<span class="hl-ok">91 captures</span> &nbsp;200 404<br>
+          POST &nbsp;/auth/login <span class="hl-ok">14 captures</span> &nbsp;200 401<br><br>
+          Plan: <span class="hl-ok">Free</span> · <span class="hl-num">143</span> / 10 000 used this month<br>
+          <a href="#pricing" style="color:var(--accent);text-decoration:none">→ Upgrade for more</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMPARISON ── -->
+<section id="compare">
+  <div class="container">
+    <div class="fade-up">
+      <div class="label section-label">vs. Alternatives</div>
+      <h2 class="section-title">Finally, tests that<br>reflect reality.</h2>
+    </div>
+    <p style="font-size:12px;color:var(--text-muted);margin-top:8px;font-family:var(--font-mono)">* Feature comparison based on publicly available documentation as of April 2026. Subject to change.</p>
+    <div class="compare-table-wrap fade-up delay-1">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th class="col-httrace">Httrace</th>
+            <th>Speedscale</th>
+            <th>GoReplay</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Generates real test code (not just replay)</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>No Kubernetes required</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>PII sanitization built-in</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="partial">Partial</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>State & fixture generation</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>Works with pytest / Jest / RSpec</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>Free tier available</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section id="pricing">
+  <div class="container">
+    <div class="fade-up" style="text-align:center">
+      <div class="label section-label">Pricing</div>
+      <h2 class="section-title">Start free.<br>Scale when it matters.</h2>
+    </div>
+    <div class="pricing-grid fade-up delay-1">
+      <div class="pricing-card">
+        <div class="pricing-tier">Free</div>
+        <div class="pricing-price">0<span class="period"> /mo</span></div>
+        <p class="pricing-desc">For solo developers and open-source projects.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>10K requests / month</li>
+          <li>1 service</li>
+          <li>Community support</li>
+          <li>pytest output</li>
+        </ul>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-tier">Starter</div>
+        <div class="pricing-price"><span class="currency">€</span>99<span class="period"> /mo</span></div>
+        <p class="pricing-desc">For early-stage startups shipping fast.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>1M requests / month</li>
+          <li>3 services</li>
+          <li>GitHub PR comments with test diffs</li>
+          <li>Email support</li>
+        </ul>
+      </div>
+      <div class="pricing-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="pricing-tier">Growth</div>
+        <div class="pricing-price"><span class="currency">€</span>499<span class="period"> /mo</span></div>
+        <p class="pricing-desc">For scale-ups with real traffic and real stakes.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>10M requests / month</li>
+          <li>10 services</li>
+          <li>Slack alerts</li>
+          <li>PII compliance guarantee</li>
+          <li>Jest & RSpec output</li>
+          <li>Priority support</li>
+        </ul>
+      </div>
+      <div class="pricing-card">
+        <div class="pricing-tier">Enterprise</div>
+        <div class="pricing-price" style="font-size:28px">from <span class="currency" style="font-size:16px">€</span>2,000<span class="period"> /mo</span></div>
+        <p class="pricing-desc">For teams that need control, compliance, and SLAs.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>Unlimited requests</li>
+          <li>On-premise option</li>
+          <li>SSO / SAML</li>
+          <li>99.9% SLA</li>
+          <li>Dedicated support</li>
+          <li>Custom data retention</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── INVESTOR ── -->
+<section id="investor">
+  <div class="container">
+    <div class="investor-card fade-up">
+      <div class="label">Our vision</div>
+      <h2 class="section-title" style="margin-top:16px">We're building the future<br>of software testing.</h2>
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-value">€2.3B</div>
+          <div class="stat-label">Global testing tools<br>market size</div>
+        </div>
+        <div class="stat" style="border-left:1px solid var(--border);border-right:1px solid var(--border)">
+          <div class="stat-value">38%</div>
+          <div class="stat-label">Teams already using production<br>telemetry for test insight</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">8h</div>
+          <div class="stat-label">Average dev time per week<br>spent writing tests</div>
+        </div>
+      </div>
+      <p class="investor-p">Manual test writing is the last major bottleneck in modern CI/CD. Httrace eliminates it by treating your production traffic as ground truth. Every real user interaction becomes a test — permanently.</p>
+      <a href="mailto:founders@httrace.com" class="btn-primary" style="display:inline-flex">Talk to the founders →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── WAITLIST ── -->
+<section id="waitlist">
+  <div class="container">
+    <div class="fade-up">
+      <h2 class="waitlist-title">Be first when<br>we launch.</h2>
+      <p class="waitlist-sub">Join developers already on the list. Early access. Founding team pricing.</p>
+      <form class="waitlist-form" id="waitlist-form-bottom" onsubmit="handleWaitlist(event,'bottom')">
+        <input type="email" placeholder="you@company.com" required>
+        <button type="submit" class="btn-primary">Join Waitlist</button>
+      </form>
+      <div class="waitlist-success" id="success-bottom">You're on the list. We'll be in touch. ✓</div>
+      <p class="waitlist-note">No spam. Early access. Founding team pricing.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">
+      <a href="#" class="footer-logo">htt<span>race</span></a>
+      <span class="footer-copy">© 2026 Httrace. Built for developers.</span>
+    </div>
+    <div class="footer-links">
+      <a href="#how">Product</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://docs.httrace.com" target="_blank" rel="noopener">Docs</a>
+      <a href="https://github.com/httrace-io/httrace" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll effect
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  });
+
+  // Fade-in on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Setup guide tab switching
+  const previewLabels = {
+    p1: 'email from Httrace',
+    p2: 'terminal — install',
+    p3: 'background capture',
+    p4: 'terminal — generate',
+    p5: 'terminal — status',
+  };
+  document.querySelectorAll('.setup-step').forEach(step => {
+    step.addEventListener('click', () => {
+      const panelId = step.dataset.panel;
+      document.querySelectorAll('.setup-step').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.setup-panel').forEach(p => p.classList.remove('active'));
+      step.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+      document.getElementById('previewLabel').textContent = previewLabels[panelId];
+    });
+  });
+
+  // Waitlist form handlers
+  function handleWaitlist(e, id) {
+    e.preventDefault();
+    document.getElementById('waitlist-form-' + id).style.display = 'none';
+    document.getElementById('success-' + id).classList.add('show');
+  }
+</script>
+</body>
+</html>
