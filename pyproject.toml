@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "traceto"
+name = "reqsnap"
 version = "0.1.0"
 description = "Capture production traffic. Generate integration tests automatically."
 readme = "README.md"
@@ -17,5 +17,5 @@ dependencies = [
 dev = ["pytest", "fastapi", "httpx", "starlette"]
 
 [project.urls]
-Homepage = "https://traceto.io"
-Repository = "https://github.com/traceto/traceto-python"
+Homepage = "https://reqsnap.io"
+Repository = "https://github.com/reqsnap/reqsnap-python"

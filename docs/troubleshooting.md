@@ -1,4 +1,4 @@
-# Traceto — Troubleshooting Guide
+# Reqsnap — Troubleshooting Guide
 
 ---
 
@@ -12,7 +12,7 @@ For FastAPI, `add_middleware` must be called before the first request. Verify th
 
 ```python
 app = FastAPI()
-app.add_middleware(TracetoCaptureMiddleware, api_key="tr_...", service="my-api")
+app.add_middleware(ReqsnapCaptureMiddleware, api_key="rq_...", service="my-api")
 # ↑ must come before route registration
 ```
 
@@ -30,16 +30,16 @@ The SDK silently drops captures when the backend is down (to avoid impacting you
 
 ```python
 import logging
-logging.getLogger("traceto").setLevel(logging.DEBUG)
+logging.getLogger("reqsnap").setLevel(logging.DEBUG)
 ```
 
-You should see `traceto: failed to flush batch: ...` if the backend is unreachable.
+You should see `reqsnap: failed to flush batch: ...` if the backend is unreachable.
 
 ---
 
 ### WSGI body always empty in tests
 
-If you're testing a WSGI-wrapped app and the request body is empty, the middleware reads the body before passing it to your app, then restores `environ["wsgi.input"]`. Make sure you're using `TracetoCaptureMiddleware` as the outermost layer — not inside another middleware that consumes the stream first.
+If you're testing a WSGI-wrapped app and the request body is empty, the middleware reads the body before passing it to your app, then restores `environ["wsgi.input"]`. Make sure you're using `ReqsnapCaptureMiddleware` as the outermost layer — not inside another middleware that consumes the stream first.
 
 ---
 
@@ -70,16 +70,16 @@ Run the backend with `ENV=development` and check logs. Common causes:
 ### `401 Invalid API key` even with a valid key
 
 - Make sure you're sending the key in the `X-Api-Key` header, not `Authorization`
-- The key must start with `tr_` — keys not starting with this prefix are rejected immediately
+- The key must start with `rq_` — keys not starting with this prefix are rejected immediately
 - The key must exist in the database and `is_active` must be `True`
-- In development, use the hardcoded dev key: `tr_local_dev` — no database entry needed
+- In development, use the hardcoded dev key: `rq_local_dev` — no database entry needed
 
 ---
 
 ### `402 Monthly quota exceeded`
 
 Your plan's monthly request limit is reached. Either:
-- Upgrade your plan at traceto.io/pricing
+- Upgrade your plan at reqsnap.com/pricing
 - Wait until the 1st of next month (quota resets automatically)
 - Reduce `sample_rate` in your middleware to stay under quota
 
@@ -111,15 +111,15 @@ lsof -ti:8000 | xargs kill -9
 
 ## CLI
 
-### `traceto.config.yaml not found`
+### `reqsnap.config.yaml not found`
 
-Run `traceto init` in your project root first.
+Run `reqsnap init` in your project root first.
 
 ---
 
 ### `Cannot connect to backend`
 
-The `backend` URL in `traceto.config.yaml` is unreachable. For local dev:
+The `backend` URL in `reqsnap.config.yaml` is unreachable. For local dev:
 
 1. Start the backend: `uvicorn backend.main:app --reload`
 2. Confirm it's running: `curl http://localhost:8000/health`
@@ -133,12 +133,12 @@ The backend returned a filename containing directory separators or non-alphanume
 
 ---
 
-### `traceto generate` returns "No captures found"
+### `reqsnap generate` returns "No captures found"
 
 No captures exist for the configured `service` name. Check:
-- The `service` in `traceto.config.yaml` exactly matches the `service` parameter in your middleware
+- The `service` in `reqsnap.config.yaml` exactly matches the `service` parameter in your middleware
 - The middleware is receiving real traffic (make at least one HTTP request to your app)
-- Run `traceto status` to see if any endpoints have been captured
+- Run `reqsnap status` to see if any endpoints have been captured
 
 ---
 
@@ -173,6 +173,6 @@ Common causes:
 
 ## Getting help
 
-- GitHub Issues: [github.com/traceto-io/traceto](https://github.com/traceto-io/traceto/issues)
-- Email (Starter+): support@traceto.io
-- Slack community: traceto.io/slack
+- GitHub Issues: [github.com/reqsnap-io/reqsnap](https://github.com/reqsnap-io/reqsnap/issues)
+- Email (Starter+): support@reqsnap.com
+- Slack community: reqsnap.com/slack
