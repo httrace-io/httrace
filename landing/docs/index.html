@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Httrace Docs — Getting Started</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<meta name="description" content="Official documentation for Httrace. Learn how to capture production HTTP traffic and auto-generate pytest integration tests.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script defer data-domain="httrace.com" src="https://plausible.io/js/script.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080808; --bg-2: #0e0e0e; --bg-3: #141414;
+    --border: #1f1f1f; --border-2: #2a2a2a;
+    --text: #f0f0f0; --text-muted: #666; --text-dim: #999;
+    --accent: #3b82f6; --accent-dim: rgba(59,130,246,0.12);
+    --green: #22c55e; --yellow: #f59e0b; --purple: #c084fc;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1,h2,h3,h4 { font-family: var(--font-display); line-height: 1.2; letter-spacing: -0.02em; }
+  code {
+    font-family: var(--font-mono); font-size: 0.88em;
+    background: var(--bg-3); border: 1px solid var(--border);
+    border-radius: 5px; padding: 2px 6px; color: var(--accent);
+  }
+  pre {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 24px 28px; overflow-x: auto;
+    font-family: var(--font-mono); font-size: 14px; line-height: 1.8;
+    margin: 20px 0;
+  }
+  pre code { background: none; border: none; padding: 0; font-size: inherit; color: inherit; }
+  .kw  { color: #c084fc; }
+  .fn  { color: #93c5fd; }
+  .st  { color: #86efac; }
+  .nu  { color: #fb923c; }
+  .cm  { color: #4b5563; }
+  .pr  { color: #555; }
+  .ok  { color: #22c55e; }
+
+  /* ── LAYOUT ── */
+  .docs-shell { display: flex; flex: 1; }
+  .sidebar {
+    width: 260px; flex-shrink: 0;
+    background: var(--bg-2); border-right: 1px solid var(--border);
+    padding: 32px 0; position: sticky; top: 0; height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    display: block; padding: 0 24px 28px;
+    font-family: var(--font-display); font-size: 20px; font-weight: 800;
+    color: var(--text); border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .sidebar-logo span { color: var(--accent); }
+  .sidebar-back {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 24px 20px; font-size: 13px; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .sidebar-back:hover { color: var(--accent); text-decoration: none; }
+  .sidebar-section {
+    padding: 0 24px 8px;
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .sidebar-link {
+    display: block; padding: 8px 24px; font-size: 14px;
+    color: var(--text-dim); border-left: 2px solid transparent;
+  }
+  .sidebar-link:hover { color: var(--text); text-decoration: none; }
+  .sidebar-link.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-dim); }
+
+  .docs-content { flex: 1; padding: 64px 80px; max-width: 860px; }
+  .docs-content > * + * { margin-top: 24px; }
+  .docs-content h1 { font-size: 40px; margin-bottom: 8px; }
+  .docs-content h2 { font-size: 26px; margin-top: 56px; margin-bottom: 4px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .docs-content h3 { font-size: 18px; margin-top: 36px; color: var(--text-dim); }
+  .docs-content p { color: var(--text-dim); }
+  .docs-content ul, .docs-content ol { padding-left: 20px; color: var(--text-dim); }
+  .docs-content li { margin-bottom: 6px; }
+
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  }
+  .badge-green { background: #22c55e18; color: var(--green); border: 1px solid #22c55e33; }
+  .badge-blue  { background: var(--accent-dim); color: var(--accent); border: 1px solid #3b82f633; }
+  .badge-yellow{ background: #f59e0b15; color: var(--yellow); border: 1px solid #f59e0b33; }
+
+  .callout {
+    border-left: 3px solid var(--accent); background: var(--accent-dim);
+    border-radius: 0 10px 10px 0; padding: 16px 20px; font-size: 14px;
+    color: var(--text-dim);
+  }
+  .callout.warn { border-color: var(--yellow); background: #f59e0b0d; }
+  .callout strong { color: var(--text); }
+
+  .param-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  .param-table th { text-align: left; padding: 10px 16px; border-bottom: 1px solid var(--border-2); color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .param-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .param-table td:first-child { font-family: var(--font-mono); color: var(--accent); font-size: 13px; }
+  .param-table tr:last-child td { border-bottom: none; }
+
+  .step-number {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    flex-shrink: 0; margin-right: 12px;
+  }
+  .step-row { display: flex; align-items: flex-start; margin-bottom: 8px; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .docs-content { padding: 32px 20px; }
+    .docs-content h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="docs-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <a href="../" class="sidebar-logo">htt<span>race</span></a>
+    <a href="../" class="sidebar-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to httrace.com
+    </a>
+
+    <div class="sidebar-section">Getting started</div>
+    <a href="#quickstart" class="sidebar-link active">Quickstart</a>
+    <a href="#installation" class="sidebar-link">Installation</a>
+
+    <div class="sidebar-section" style="margin-top:20px">Configuration</div>
+    <a href="#middleware" class="sidebar-link">Add middleware</a>
+    <a href="#config-options" class="sidebar-link">Middleware options</a>
+    <a href="#pii" class="sidebar-link">PII sanitization</a>
+    <a href="#sampling" class="sidebar-link">Sampling</a>
+
+    <div class="sidebar-section" style="margin-top:20px">CLI Reference</div>
+    <a href="#generate" class="sidebar-link">Generate tests</a>
+    <a href="#cli" class="sidebar-link">httrace generate</a>
+    <a href="#cli-status" class="sidebar-link">httrace status</a>
+
+    <div class="sidebar-section" style="margin-top:20px">Frameworks</div>
+    <a href="#fastapi" class="sidebar-link">FastAPI</a>
+    <a href="#django" class="sidebar-link">Django</a>
+    <a href="#flask" class="sidebar-link">Flask</a>
+    <a href="#starlette" class="sidebar-link">Starlette</a>
+  </aside>
+
+  <!-- Content -->
+  <main class="docs-content">
+
+    <div>
+      <span class="badge badge-green">v0.1.1</span>&nbsp;
+      <span class="badge badge-blue">Python 3.9+</span>&nbsp;
+      <span class="badge badge-yellow">Private Beta</span>
+    </div>
+
+    <h1>Getting Started</h1>
+    <p style="font-size:18px;color:var(--text-dim)">Httrace captures real production HTTP traffic and automatically generates pytest integration tests — without you writing a single line.</p>
+
+    <!-- QUICKSTART -->
+    <h2 id="quickstart">Quickstart</h2>
+    <p>You'll have your first auto-generated tests in under 5 minutes.</p>
+
+    <div class="step-row"><span class="step-number">1</span><strong>Install the package</strong></div>
+    <pre><span class="pr">$</span> <span class="ok">pip install httrace</span></pre>
+
+    <div class="step-row"><span class="step-number">2</span><strong>Add the middleware to your app</strong></div>
+    <pre><span class="kw">import</span> os
+<span class="kw">from</span> httrace <span class="kw">import</span> <span class="fn">HttraceCaptureMiddleware</span>
+
+app.<span class="fn">add_middleware</span>(
+    <span class="fn">HttraceCaptureMiddleware</span>,
+    api_key<span class="pr">=</span>os.environ[<span class="st">"HTTRACE_API_KEY"</span>],
+    service<span class="pr">=</span><span class="st">"my-api"</span>,
+    sample_rate<span class="pr">=</span><span class="nu">0.1</span>,   <span class="cm"># capture 10% of requests</span>
+)</pre>
+
+    <div class="step-row"><span class="step-number">3</span><strong>Let real traffic flow in — then generate</strong></div>
+    <pre><span class="pr">$</span> <span class="ok">httrace generate</span>
+
+  <span class="ok">✓</span> test_post_orders.py    <span class="cm">(3 tests)</span>
+  <span class="ok">✓</span> test_get_products.py   <span class="cm">(5 tests)</span>
+  <span class="ok">✓</span> test_post_auth_login.py <span class="cm">(2 tests)</span>
+
+<span class="ok">✓ 10 tests generated across 3 endpoints</span></pre>
+
+    <div class="callout">
+      <strong>Get your API key:</strong> Sign up for the waitlist at <a href="../#waitlist">httrace.com</a>. Beta users receive their key by email within 24 hours.
+    </div>
+
+    <!-- INSTALLATION -->
+    <h2 id="installation">Installation</h2>
+    <p>Httrace requires Python 3.9 or higher. It's published on PyPI:</p>
+    <pre><span class="pr">$</span> pip install httrace
+<span class="cm"># or with uv:</span>
+<span class="pr">$</span> uv add httrace</pre>
+    <p>The SDK has minimal dependencies: <code>httpx</code> for async uploads and <code>anyio</code> for background threads. No additional broker or sidecar is required.</p>
+
+    <!-- MIDDLEWARE -->
+    <h2 id="middleware">Add middleware</h2>
+    <p>The capture middleware is a standard ASGI/WSGI middleware. It intercepts requests after they complete, reads the request and response, sanitizes PII, and queues the payload for upload — all off the critical path.</p>
+
+    <h3 id="config-options">Middleware options</h3>
+    <table class="param-table">
+      <thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>api_key</td><td>str</td><td>required</td><td>Your Httrace API key (<code>ht_...</code>). Use an environment variable — never hardcode.</td></tr>
+        <tr><td>service</td><td>str</td><td>required</td><td>A logical name for the service (e.g. <code>"orders-api"</code>). Used to group endpoints in the dashboard.</td></tr>
+        <tr><td>sample_rate</td><td>float</td><td><code>0.1</code></td><td>Fraction of requests to capture (0.0–1.0). Start low in production; raise after verifying overhead.</td></tr>
+        <tr><td>exclude_paths</td><td>list[str]</td><td><code>[]</code></td><td>Path prefixes to skip (e.g. <code>["/health", "/metrics"]</code>).</td></tr>
+        <tr><td>max_body_bytes</td><td>int</td><td><code>65536</code></td><td>Maximum request/response body size to capture (bytes). Larger bodies are truncated.</td></tr>
+        <tr><td>pii_fields</td><td>list[str]</td><td>built-in list</td><td>Additional field names to redact on top of the built-in blocklist.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- PII -->
+    <h2 id="pii">PII sanitization</h2>
+    <p>The SDK applies two layers of sanitization before any payload leaves your server:</p>
+    <ul>
+      <li><strong>Field-name blocklist</strong> — fields named <code>password</code>, <code>token</code>, <code>secret</code>, <code>ssn</code>, <code>cvv</code>, and 40+ others are replaced with <code>"[REDACTED]"</code>.</li>
+      <li><strong>Value-pattern regex</strong> — detects credit card numbers, IBANs, JWTs, email addresses, IPv4 addresses, and phone numbers in field values.</li>
+    </ul>
+    <p>You can extend the blocklist via the <code>pii_fields</code> parameter:</p>
+    <pre>app.<span class="fn">add_middleware</span>(
+    <span class="fn">HttraceCaptureMiddleware</span>,
+    api_key<span class="pr">=</span>...,
+    service<span class="pr">=</span><span class="st">"my-api"</span>,
+    pii_fields<span class="pr">=</span>[<span class="st">"tax_id"</span>, <span class="st">"passport_number"</span>, <span class="st">"date_of_birth"</span>],
+)</pre>
+
+    <!-- SAMPLING -->
+    <h2 id="sampling">Sampling</h2>
+    <p>We recommend <code>sample_rate=0.05</code> to <code>0.1</code> in production. Even 5% of traffic on a busy API generates hundreds of test scenarios per endpoint per day.</p>
+    <div class="callout warn">
+      <strong>Heads up:</strong> Setting <code>sample_rate=1.0</code> on a high-traffic service will significantly increase API usage and may hit your plan's monthly request limit quickly.
+    </div>
+
+    <!-- GENERATE -->
+    <h2 id="generate">Generate tests</h2>
+    <p>After traffic has been captured, run the CLI to generate test files:</p>
+    <pre><span class="pr">$</span> httrace generate [OPTIONS]
+
+Options:
+  --service TEXT      Service name to generate for (default: all)
+  --output PATH       Output directory (default: ./tests/)
+  --framework TEXT    Test framework: pytest | jest | rspec (default: pytest)
+  --min-requests INT  Min captured requests per endpoint to generate a test (default: 3)
+  --dry-run           Preview output without writing files</pre>
+
+    <p>Generated test files follow this structure:</p>
+    <pre><span class="cm"># Generated by Httrace v0.1.1 — 2026-04-18</span>
+<span class="cm"># Source: 412 captured requests on POST /orders</span>
+<span class="kw">import</span> pytest
+<span class="kw">from</span> httpx <span class="kw">import</span> <span class="fn">AsyncClient</span>
+<span class="kw">from</span> app.main <span class="kw">import</span> app
+
+@pytest.mark.<span class="fn">anyio</span>
+<span class="kw">async def</span> <span class="fn">test_post_orders_authenticated</span>():
+    <span class="kw">async with</span> <span class="fn">AsyncClient</span>(app<span class="pr">=</span>app, base_url<span class="pr">=</span><span class="st">"http://test"</span>) <span class="kw">as</span> client:
+        response <span class="pr">=</span> <span class="kw">await</span> client.<span class="fn">post</span>(
+            <span class="st">"/orders"</span>,
+            json<span class="pr">=</span>{<span class="st">"product_id"</span>: <span class="st">"prod_123"</span>, <span class="st">"quantity"</span>: <span class="nu">2</span>},
+            headers<span class="pr">=</span>{<span class="st">"Authorization"</span>: <span class="st">"Bearer [TEST_TOKEN]"</span>},
+        )
+    <span class="kw">assert</span> response.status_code <span class="pr">==</span> <span class="nu">201</span>
+    <span class="kw">assert</span> <span class="st">"order_id"</span> <span class="kw">in</span> response.<span class="fn">json</span>()</pre>
+
+    <!-- CLI -->
+    <h2 id="cli">CLI Reference</h2>
+    <h3 id="cli-status">httrace status</h3>
+    <p>Check how much traffic has been captured for each service:</p>
+    <pre><span class="pr">$</span> httrace status
+
+Service: my-api
+  Captured requests (last 7d): 8,432
+  Endpoints tracked: 12
+  Tests already generated: 34
+  Plan usage: 8,432 / 1,000,000 requests</pre>
+
+    <!-- FRAMEWORKS -->
+    <h2 id="fastapi">FastAPI</h2>
+    <pre><span class="kw">from</span> fastapi <span class="kw">import</span> <span class="fn">FastAPI</span>
+<span class="kw">from</span> httrace <span class="kw">import</span> <span class="fn">HttraceCaptureMiddleware</span>
+<span class="kw">import</span> os
+
+app <span class="pr">=</span> <span class="fn">FastAPI</span>()
+app.<span class="fn">add_middleware</span>(<span class="fn">HttraceCaptureMiddleware</span>,
+    api_key<span class="pr">=</span>os.environ[<span class="st">"HTTRACE_API_KEY"</span>], service<span class="pr">=</span><span class="st">"my-api"</span>)</pre>
+
+    <h2 id="django">Django</h2>
+    <p>Add to <code>MIDDLEWARE</code> in <code>settings.py</code>:</p>
+    <pre>MIDDLEWARE <span class="pr">=</span> [
+    <span class="st">"httrace.django.HttraceCaptureMiddleware"</span>,
+    <span class="cm"># ... your other middleware</span>
+]
+
+HTTRACE <span class="pr">=</span> {
+    <span class="st">"API_KEY"</span>: os.environ[<span class="st">"HTTRACE_API_KEY"</span>],
+    <span class="st">"SERVICE"</span>: <span class="st">"my-api"</span>,
+    <span class="st">"SAMPLE_RATE"</span>: <span class="nu">0.1</span>,
+}</pre>
+
+    <h2 id="flask">Flask</h2>
+    <pre><span class="kw">from</span> flask <span class="kw">import</span> <span class="fn">Flask</span>
+<span class="kw">from</span> httrace.flask <span class="kw">import</span> <span class="fn">HttraceFlask</span>
+
+app <span class="pr">=</span> <span class="fn">Flask</span>(__name__)
+<span class="fn">HttraceFlask</span>(app, api_key<span class="pr">=</span>os.environ[<span class="st">"HTTRACE_API_KEY"</span>], service<span class="pr">=</span><span class="st">"my-api"</span>)</pre>
+
+    <h2 id="starlette">Starlette</h2>
+    <pre><span class="kw">from</span> starlette.applications <span class="kw">import</span> <span class="fn">Starlette</span>
+<span class="kw">from</span> starlette.middleware <span class="kw">import</span> <span class="fn">Middleware</span>
+<span class="kw">from</span> httrace <span class="kw">import</span> <span class="fn">HttraceCaptureMiddleware</span>
+
+app <span class="pr">=</span> <span class="fn">Starlette</span>(middleware<span class="pr">=</span>[
+    <span class="fn">Middleware</span>(<span class="fn">HttraceCaptureMiddleware</span>,
+        api_key<span class="pr">=</span>os.environ[<span class="st">"HTTRACE_API_KEY"</span>], service<span class="pr">=</span><span class="st">"my-api"</span>),
+])</pre>
+
+    <div style="margin-top:64px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:13px;display:flex;justify-content:space-between;align-items:center;">
+      <span>© 2026 Httrace</span>
+      <span>Questions? <a href="mailto:founders@httrace.com">founders@httrace.com</a></span>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  const sections = Array.from(document.querySelectorAll('h2[id], h3[id]'));
+  const links = document.querySelectorAll('.sidebar-link');
+
+  function updateActive() {
+    const scrollY = window.scrollY + 100;
+    let current = sections[0]?.id ?? '';
+    for (const section of sections) {
+      if (section.offsetTop <= scrollY) current = section.id;
+      else break;
+    }
+    links.forEach(l => {
+      const href = l.getAttribute('href');
+      l.classList.toggle('active', href === '#' + current);
+    });
+  }
+
+  window.addEventListener('scroll', updateActive, { passive: true });
+  updateActive();
+</script>
+</body>
+</html>
