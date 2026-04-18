@@ -1,46 +1,47 @@
-# Traceto
+# Reqsnap
 
 **Capture real production traffic. Auto-generate integration tests.**
 
-[![PyPI](https://img.shields.io/pypi/v/traceto)](https://pypi.org/project/traceto/)
+[![PyPI](https://img.shields.io/pypi/v/reqsnap)](https://pypi.org/project/reqsnap/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI](https://github.com/traceto-io/traceto/actions/workflows/sdk-ci.yml/badge.svg)](https://github.com/traceto-io/traceto/actions)
+[![CI](https://github.com/reqsnap/reqsnap/actions/workflows/sdk-ci.yml/badge.svg)](https://github.com/reqsnap/reqsnap/actions)
 
 ```bash
-pip install traceto
+pip install reqsnap
 ```
 
 ## How it works
 
 1. **Install** — add one line of middleware to your app
 2. **Capture** — real traffic is captured and sanitized in the background
-3. **Generate** — `traceto generate` writes pytest files directly into your repo
+3. **Generate** — `reqsnap generate` writes pytest files directly into your repo
 
 ## Quickstart
 
 ```python
 # FastAPI / Starlette
-from traceto import TracetoCaptureMiddleware
+from reqsnap import ReqsnapCaptureMiddleware
 
 app.add_middleware(
-    TracetoCaptureMiddleware,
-    api_key="tr_your_key_here",
+    ReqsnapCaptureMiddleware,
+    api_key="rq_your_key_here",
     service="my-api",
 )
 ```
 
 ```python
 # Flask / Django (WSGI)
-from traceto import TracetoCaptureMiddleware
+from reqsnap import ReqsnapCaptureMiddleware
 
-app = TracetoCaptureMiddleware(app, api_key="tr_your_key_here", service="my-api")
+app = ReqsnapCaptureMiddleware(app, api_key="rq_your_key_here", service="my-api")
 ```
 
 Then generate tests:
 
 ```bash
-traceto init       # creates traceto.config.yaml
-traceto generate   # writes pytest files to tests/integration/
+reqsnap init       # creates reqsnap.config.yaml
+reqsnap generate   # writes pytest files to tests/integration/
+reqsnap status     # shows endpoint coverage
 ```
 
 ## Features
@@ -60,4 +61,4 @@ traceto generate   # writes pytest files to tests/integration/
 ## License
 
 MIT — see [LICENSE](LICENSE).  
-The Traceto backend and test generation service are proprietary.
+The Reqsnap backend and test generation service are proprietary.
