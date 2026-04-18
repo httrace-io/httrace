@@ -1603,10 +1603,38 @@
   }
 
   // Waitlist form handlers
-  function handleWaitlist(e, id) {
+  const API_BASE = 'https://httrace-api.fly.dev';
+
+  async function handleWaitlist(e, id) {
     e.preventDefault();
-    document.getElementById('waitlist-form-' + id).style.display = 'none';
-    document.getElementById('success-' + id).classList.add('show');
+    const form = document.getElementById('waitlist-form-' + id);
+    const input = form.querySelector('input[type="email"]');
+    const btn = form.querySelector('button');
+    const email = input.value.trim();
+
+    btn.disabled = true;
+    btn.textContent = 'Joining...';
+
+    try {
+      const res = await fetch(`${API_BASE}/v1/waitlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (res.ok || res.status === 201) {
+        form.style.display = 'none';
+        document.getElementById('success-' + id).classList.add('show');
+      } else {
+        throw new Error('Server error');
+      }
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'Join Waitlist';
+      input.setCustomValidity('Something went wrong — please try again.');
+      input.reportValidity();
+      setTimeout(() => input.setCustomValidity(''), 3000);
+    }
   }
 </script>
 </body>
