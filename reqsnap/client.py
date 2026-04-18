@@ -5,14 +5,14 @@ import logging
 import httpx
 from .capture import CapturedInteraction
 
-logger = logging.getLogger("traceto")
+logger = logging.getLogger("reqsnap")
 
-_DEFAULT_ENDPOINT = "https://ingest.traceto.io/v1/captures"
+_DEFAULT_ENDPOINT = "https://ingest.reqsnap.com/v1/captures"
 
 _SENTINEL = object()
 
 
-class TracetoClient:
+class ReqsnapClient:
     """
     Fire-and-forget uploader. Captures are queued and sent in a background
     thread so the request path is never blocked. Flushes on process exit.

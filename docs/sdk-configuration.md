@@ -1,27 +1,27 @@
-# Traceto SDK — Configuration Reference
+# Reqsnap SDK — Configuration Reference
 
 ## Installation
 
 ```bash
-pip install traceto
+pip install reqsnap
 ```
 
 Requires Python 3.10+.
 
 ---
 
-## TracetoCaptureMiddleware
+## ReqsnapCaptureMiddleware
 
 The main integration point. Add it once to your app — it captures all traffic in the background without affecting request latency.
 
 ### ASGI (FastAPI / Starlette)
 
 ```python
-from traceto import TracetoCaptureMiddleware
+from reqsnap import ReqsnapCaptureMiddleware
 
 app.add_middleware(
-    TracetoCaptureMiddleware,
-    api_key="tr_your_key_here",
+    ReqsnapCaptureMiddleware,
+    api_key="rq_your_key_here",
     service="my-api",
 )
 ```
@@ -29,11 +29,11 @@ app.add_middleware(
 ### WSGI (Flask / Django)
 
 ```python
-from traceto import TracetoCaptureMiddleware
+from reqsnap import ReqsnapCaptureMiddleware
 
-app = TracetoCaptureMiddleware(
+app = ReqsnapCaptureMiddleware(
     app,
-    api_key="tr_your_key_here",
+    api_key="rq_your_key_here",
     service="my-api",
 )
 ```
@@ -46,7 +46,7 @@ app = TracetoCaptureMiddleware(
 |---|---|---|---|
 | `api_key` | `str` | **required** | Your `tr_` prefixed API key |
 | `service` | `str` | **required** | Logical name for this service (e.g. `"payments-api"`) |
-| `endpoint` | `str` | `https://ingest.traceto.io/v1/captures` | Backend ingest URL. Set to `http://localhost:8000/v1/captures` for local dev |
+| `endpoint` | `str` | `https://ingest.reqsnap.com/v1/captures` | Backend ingest URL. Set to `http://localhost:8000/v1/captures` for local dev |
 | `sample_rate` | `float` | `1.0` | Fraction of requests to capture (0.0–1.0). Use `0.1` for high-traffic services |
 | `batch_size` | `int` | `50` | Number of captures to batch before flushing to backend |
 | `max_queue` | `int` | `10_000` | Max in-memory queue size. Exceeding this drops captures silently |
@@ -56,8 +56,8 @@ app = TracetoCaptureMiddleware(
 
 ```python
 app.add_middleware(
-    TracetoCaptureMiddleware,
-    api_key=os.environ["TRACETO_API_KEY"],
+    ReqsnapCaptureMiddleware,
+    api_key=os.environ["REQSNAP_API_KEY"],
     service="orders-service",
     sample_rate=0.05,          # capture 5% of traffic
     batch_size=100,
@@ -107,8 +107,8 @@ The SDK itself reads no environment variables — pass config explicitly to prev
 ```python
 import os
 app.add_middleware(
-    TracetoCaptureMiddleware,
-    api_key=os.environ["TRACETO_API_KEY"],   # never hardcode
+    ReqsnapCaptureMiddleware,
+    api_key=os.environ["REQSNAP_API_KEY"],   # never hardcode
     service=os.environ.get("SERVICE_NAME", "my-service"),
 )
 ```
@@ -122,21 +122,21 @@ The SDK registers an `atexit` handler automatically. When your process exits nor
 To trigger a flush manually (e.g. in a custom signal handler):
 
 ```python
-from traceto.client import _client_instance  # internal, may change
+from reqsnap.client import _client_instance  # internal, may change
 
 _client_instance.shutdown(timeout=10.0)
 ```
 
 ---
 
-## traceto.config.yaml
+## reqsnap.config.yaml
 
-Created by `traceto init`. Used by the CLI only (not the SDK).
+Created by `reqsnap init`. Used by the CLI only (not the SDK).
 
 ```yaml
-api_key: tr_your_key_here
+api_key: rq_your_key_here
 service: my-api
-backend: http://localhost:8000   # or https://ingest.traceto.io
+backend: http://localhost:8000   # or https://ingest.reqsnap.com
 output: tests/integration        # where generated test files are written
 ```
 
