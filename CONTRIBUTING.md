@@ -1,6 +1,6 @@
-# Contributing to Reqsnap SDK
+# Contributing to Httrace SDK
 
-Thanks for considering a contribution! The SDK is the open-source core of Reqsnap — PRs are welcome.
+Thanks for considering a contribution! The SDK is the open-source core of Httrace — PRs are welcome.
 
 ## What's in scope for the SDK
 
@@ -14,8 +14,8 @@ The backend (test generation, billing, storage) is proprietary and not part of t
 ## Getting started
 
 ```bash
-git clone https://github.com/reqsnap/reqsnap-python
-cd reqsnap-python
+git clone https://github.com/httrace/httrace-python
+cd httrace-python
 pip install -e ".[dev]"
 pytest
 ```
@@ -25,16 +25,16 @@ pytest
 - One feature or fix per PR
 - Add or update tests for any changed behaviour
 - Keep the public API backwards compatible
-- Run `ruff check .` and `mypy reqsnap/` before submitting
+- Run `ruff check .` and `mypy httrace/` before submitting
 
 ## Reporting security issues
 
 **Do not open a GitHub issue for security vulnerabilities.**
-Email security@reqsnap.io instead. We aim to respond within 48 hours.
+Email security@httrace.com instead. We aim to respond within 48 hours.
 
 ## Improving PII detection
 
-The sanitizer (`reqsnap/sanitizer.py`) is the most community-valuable part.
+The sanitizer (`httrace/sanitizer.py`) is the most community-valuable part.
 If you find a PII pattern it misses, please open an issue or PR with:
 1. The pattern (anonymized example)
 2. A failing test case

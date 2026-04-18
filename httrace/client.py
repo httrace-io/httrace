@@ -5,14 +5,14 @@ import logging
 import httpx
 from .capture import CapturedInteraction
 
-logger = logging.getLogger("reqsnap")
+logger = logging.getLogger("httrace")
 
-_DEFAULT_ENDPOINT = "https://ingest.reqsnap.com/v1/captures"
+_DEFAULT_ENDPOINT = "https://ingest.httrace.com/v1/captures"
 
 _SENTINEL = object()
 
 
-class ReqsnapClient:
+class HttraceClient:
     """
     Fire-and-forget uploader. Captures are queued and sent in a background
     thread so the request path is never blocked. Flushes on process exit.

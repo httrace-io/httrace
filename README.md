@@ -1,47 +1,47 @@
-# Reqsnap
+# Httrace
 
-**Capture real production traffic. Auto-generate integration tests.**
+**Capture real production HTTP traffic. Auto-generate integration tests.**
 
-[![PyPI](https://img.shields.io/pypi/v/reqsnap)](https://pypi.org/project/reqsnap/)
+[![PyPI](https://img.shields.io/pypi/v/httrace)](https://pypi.org/project/httrace/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI](https://github.com/reqsnap/reqsnap/actions/workflows/sdk-ci.yml/badge.svg)](https://github.com/reqsnap/reqsnap/actions)
+[![CI](https://github.com/httrace-io/httrace/actions/workflows/sdk-ci.yml/badge.svg)](https://github.com/httrace-io/httrace/actions)
 
 ```bash
-pip install reqsnap
+pip install httrace
 ```
 
 ## How it works
 
 1. **Install** — add one line of middleware to your app
-2. **Capture** — real traffic is captured and sanitized in the background
-3. **Generate** — `reqsnap generate` writes pytest files directly into your repo
+2. **Capture** — real HTTP traffic is captured and sanitized in the background
+3. **Generate** — `httrace generate` writes pytest files directly into your repo
 
 ## Quickstart
 
 ```python
 # FastAPI / Starlette
-from reqsnap import ReqsnapCaptureMiddleware
+from httrace import HttraceCaptureMiddleware
 
 app.add_middleware(
-    ReqsnapCaptureMiddleware,
-    api_key="rq_your_key_here",
+    HttraceCaptureMiddleware,
+    api_key="ht_your_key_here",
     service="my-api",
 )
 ```
 
 ```python
 # Flask / Django (WSGI)
-from reqsnap import ReqsnapCaptureMiddleware
+from httrace import HttraceCaptureMiddleware
 
-app = ReqsnapCaptureMiddleware(app, api_key="rq_your_key_here", service="my-api")
+app = HttraceCaptureMiddleware(app, api_key="ht_your_key_here", service="my-api")
 ```
 
 Then generate tests:
 
 ```bash
-reqsnap init       # creates reqsnap.config.yaml
-reqsnap generate   # writes pytest files to tests/integration/
-reqsnap status     # shows endpoint coverage
+httrace init       # creates httrace.config.yaml
+httrace generate   # writes pytest files to tests/integration/
+httrace status     # shows endpoint coverage
 ```
 
 ## Features
@@ -61,4 +61,4 @@ reqsnap status     # shows endpoint coverage
 ## License
 
 MIT — see [LICENSE](LICENSE).  
-The Reqsnap backend and test generation service are proprietary.
+The Httrace backend and test generation service are proprietary.

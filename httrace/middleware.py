@@ -7,17 +7,17 @@ from .capture import (
     _safe_parse_body, _filter_headers,
 )
 from .sanitizer import sanitize_json_body, sanitize
-from .client import ReqsnapClient
+from .client import HttraceClient
 
 
-class ReqsnapCaptureMiddleware:
+class HttraceCaptureMiddleware:
     """
     ASGI middleware (FastAPI / Starlette / any ASGI app).
 
     Usage:
         app.add_middleware(
-            ReqsnapCaptureMiddleware,
-            api_key="rq_...",
+            HttraceCaptureMiddleware,
+            api_key="ht_...",
             service="checkout-api",
             sample_rate=0.1,   # capture 10% of traffic
         )
@@ -39,7 +39,7 @@ class ReqsnapCaptureMiddleware:
         kwargs = {"api_key": api_key}
         if endpoint:
             kwargs["endpoint"] = endpoint
-        self._client = ReqsnapClient(**kwargs)
+        self._client = HttraceClient(**kwargs)
 
     async def __call__(self, scope, receive, send) -> None:
         if scope["type"] != "http" or not self._should_capture(scope):
@@ -127,20 +127,20 @@ class ReqsnapCaptureMiddleware:
             pass  # Never crash the app due to instrumentation
 
 
-class WsgiReqsnapCaptureMiddleware:
+class WsgiHttraceCaptureMiddleware:
     """
     WSGI middleware (Flask / Django).
 
     Usage (Flask):
-        from reqsnap import WsgiReqsnapCaptureMiddleware
-        app.wsgi_app = WsgiReqsnapCaptureMiddleware(app.wsgi_app, api_key="rq_...")
+        from httrace import WsgiHttraceCaptureMiddleware
+        app.wsgi_app = WsgiHttraceCaptureMiddleware(app.wsgi_app, api_key="ht_...")
     """
 
     def __init__(self, app, api_key: str, service: str = "default", sample_rate: float = 0.1):
         self._app = app
         self._service = service
         self._sample_rate = sample_rate
-        self._client = ReqsnapClient(api_key=api_key)
+        self._client = HttraceClient(api_key=api_key)
 
     def __call__(self, environ, start_response):
         if random.random() >= self._sample_rate:

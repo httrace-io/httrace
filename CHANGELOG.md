@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Reqsnap are documented here.
+All notable changes to Httrace are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
@@ -27,7 +27,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 **Landing Page**
 - Warning triangle icon dot was invisible — replaced `<line x2="12.01">` with `<circle>` SVG element
-- Mobile layout showed only "With Reqsnap" pane — `.pane-before` changed from `display: none` to `display: block; opacity: 0.45`
+- Mobile layout showed only "With Httrace" pane — `.pane-before` changed from `display: none` to `display: block; opacity: 0.45`
 
 ### Security
 
@@ -43,7 +43,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
-- `ReqsnapClient.shutdown(timeout)` method — flushes remaining queue and closes HTTP client cleanly; registered via `atexit` automatically
+- `HttraceClient.shutdown(timeout)` method — flushes remaining queue and closes HTTP client cleanly; registered via `atexit` automatically
 - Sentinel-based worker stop — daemon thread exits cleanly on `shutdown()` call instead of running forever
 - Path parameter normalization in generate route — `/users/42` and `/users/1` are now grouped as `/users/{id}`
 - Slug collision prevention — duplicate filenames get a `_2`, `_3` suffix instead of silently overwriting
@@ -69,7 +69,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Rate limiting via slowapi (2 000 req/min on ingest)
 - CORS, body size limit (10 MB), generic error handler (no stack trace leakage)
 - pytest test generator with fixture inference and chain analysis
-- typer-based CLI (`reqsnap init`, `reqsnap generate`, `reqsnap status`)
+- typer-based CLI (`httrace init`, `httrace generate`, `httrace status`)
 - Marketing landing page (dark theme, Vercel-inspired)
 - Legal: Terms of Service (German B2B, §14 BGB), DSGVO Art. 28 AV-Vertrag
 - Open-source SDK under MIT License

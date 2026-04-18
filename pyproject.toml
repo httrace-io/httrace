@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "reqsnap"
+name = "httrace"
 version = "0.1.0"
 description = "Capture production traffic. Generate integration tests automatically."
 readme = "README.md"
@@ -17,5 +17,5 @@ dependencies = [
 dev = ["pytest", "fastapi", "httpx", "starlette"]
 
 [project.urls]
-Homepage = "https://reqsnap.io"
-Repository = "https://github.com/reqsnap/reqsnap-python"
+Homepage = "https://httrace.com"
+Repository = "https://github.com/httrace/httrace-python"

@@ -1,4 +1,4 @@
-# Reqsnap — Troubleshooting Guide
+# Httrace — Troubleshooting Guide
 
 ---
 
@@ -12,7 +12,7 @@ For FastAPI, `add_middleware` must be called before the first request. Verify th
 
 ```python
 app = FastAPI()
-app.add_middleware(ReqsnapCaptureMiddleware, api_key="rq_...", service="my-api")
+app.add_middleware(HttraceCaptureMiddleware, api_key="ht_...", service="my-api")
 # ↑ must come before route registration
 ```
 
@@ -30,16 +30,16 @@ The SDK silently drops captures when the backend is down (to avoid impacting you
 
 ```python
 import logging
-logging.getLogger("reqsnap").setLevel(logging.DEBUG)
+logging.getLogger("httrace").setLevel(logging.DEBUG)
 ```
 
-You should see `reqsnap: failed to flush batch: ...` if the backend is unreachable.
+You should see `httrace: failed to flush batch: ...` if the backend is unreachable.
 
 ---
 
 ### WSGI body always empty in tests
 
-If you're testing a WSGI-wrapped app and the request body is empty, the middleware reads the body before passing it to your app, then restores `environ["wsgi.input"]`. Make sure you're using `ReqsnapCaptureMiddleware` as the outermost layer — not inside another middleware that consumes the stream first.
+If you're testing a WSGI-wrapped app and the request body is empty, the middleware reads the body before passing it to your app, then restores `environ["wsgi.input"]`. Make sure you're using `HttraceCaptureMiddleware` as the outermost layer — not inside another middleware that consumes the stream first.
 
 ---
 
@@ -70,16 +70,16 @@ Run the backend with `ENV=development` and check logs. Common causes:
 ### `401 Invalid API key` even with a valid key
 
 - Make sure you're sending the key in the `X-Api-Key` header, not `Authorization`
-- The key must start with `rq_` — keys not starting with this prefix are rejected immediately
+- The key must start with `ht_` — keys not starting with this prefix are rejected immediately
 - The key must exist in the database and `is_active` must be `True`
-- In development, use the hardcoded dev key: `rq_local_dev` — no database entry needed
+- In development, use the hardcoded dev key: `ht_local_dev` — no database entry needed
 
 ---
 
 ### `402 Monthly quota exceeded`
 
 Your plan's monthly request limit is reached. Either:
-- Upgrade your plan at reqsnap.com/pricing
+- Upgrade your plan at httrace.com/pricing
 - Wait until the 1st of next month (quota resets automatically)
 - Reduce `sample_rate` in your middleware to stay under quota
 
@@ -111,15 +111,15 @@ lsof -ti:8000 | xargs kill -9
 
 ## CLI
 
-### `reqsnap.config.yaml not found`
+### `httrace.config.yaml not found`
 
-Run `reqsnap init` in your project root first.
+Run `httrace init` in your project root first.
 
 ---
 
 ### `Cannot connect to backend`
 
-The `backend` URL in `reqsnap.config.yaml` is unreachable. For local dev:
+The `backend` URL in `httrace.config.yaml` is unreachable. For local dev:
 
 1. Start the backend: `uvicorn backend.main:app --reload`
 2. Confirm it's running: `curl http://localhost:8000/health`
@@ -133,12 +133,12 @@ The backend returned a filename containing directory separators or non-alphanume
 
 ---
 
-### `reqsnap generate` returns "No captures found"
+### `httrace generate` returns "No captures found"
 
 No captures exist for the configured `service` name. Check:
-- The `service` in `reqsnap.config.yaml` exactly matches the `service` parameter in your middleware
+- The `service` in `httrace.config.yaml` exactly matches the `service` parameter in your middleware
 - The middleware is receiving real traffic (make at least one HTTP request to your app)
-- Run `reqsnap status` to see if any endpoints have been captured
+- Run `httrace status` to see if any endpoints have been captured
 
 ---
 
@@ -173,6 +173,6 @@ Common causes:
 
 ## Getting help
 
-- GitHub Issues: [github.com/reqsnap-io/reqsnap](https://github.com/reqsnap-io/reqsnap/issues)
-- Email (Starter+): support@reqsnap.com
-- Slack community: reqsnap.com/slack
+- GitHub Issues: [github.com/httrace-io/httrace](https://github.com/httrace-io/httrace/issues)
+- Email (Starter+): support@httrace.com
+- Slack community: httrace.com/slack
