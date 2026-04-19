@@ -972,7 +972,7 @@
     <div class="hero-inner">
       <div class="hero-badge fade-up">
         <span class="hero-badge-dot"></span>
-        Now in private beta — 200+ developers on waitlist
+        Now in private beta — <span id="waitlist-count-badge">loading...</span>
       </div>
       <h1 class="hero-title fade-up delay-1">Your users write<br>your tests.</h1>
       <p class="hero-sub fade-up delay-2">Httrace captures real production traffic and automatically generates integration tests — without you writing a single line.</p>
@@ -1581,7 +1581,7 @@
   <div class="container">
     <div class="fade-up">
       <h2 class="waitlist-title">Be first when<br>we launch.</h2>
-      <p class="waitlist-sub">Join developers already on the list. Early access. Founding team pricing.</p>
+      <p class="waitlist-sub">Join <span id="waitlist-count-footer">developers</span> already on the list. Early access. Founding team pricing.</p>
       <form class="waitlist-form" id="waitlist-form-bottom" onsubmit="handleWaitlist(event,'bottom')">
         <input type="email" placeholder="you@company.com" required>
         <button type="submit" class="btn-primary">Join Waitlist</button>
@@ -1671,7 +1671,26 @@
   }
 
   // Waitlist form handlers
-  const API_BASE = 'https://httrace-api.fly.dev';
+  const API_BASE = 'https://api.httrace.com';
+
+  // Fetch real waitlist count
+  (async () => {
+    try {
+      const res = await fetch(`${API_BASE}/v1/waitlist/count`);
+      const { count } = await res.json();
+      const badge = document.getElementById('waitlist-count-badge');
+      const footer = document.getElementById('waitlist-count-footer');
+      if (count >= 1) {
+        badge.textContent = `${count}+ developers on waitlist`;
+        footer.textContent = `${count}+ developers`;
+      } else {
+        badge.textContent = 'now accepting signups';
+        footer.textContent = 'developers';
+      }
+    } catch {
+      document.getElementById('waitlist-count-badge').textContent = 'now accepting signups';
+    }
+  })();
 
   async function handleWaitlist(e, id) {
     e.preventDefault();
