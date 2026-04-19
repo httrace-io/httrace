@@ -443,7 +443,7 @@
   #pricing { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
   .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 1px;
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -771,7 +771,7 @@
     .problem-grid { grid-template-columns: 1fr; }
     .steps { grid-template-columns: 1fr; }
     .steps::before { display: none; }
-    .pricing-grid { grid-template-columns: 1fr 1fr; }
+    .pricing-grid { grid-template-columns: 1fr 1fr 1fr; }
     .code-compare { grid-template-columns: 1fr; }
     .code-compare .pane-before { display: block; opacity: 0.45; }
     .code-body { font-size: 11px; min-height: 160px; overflow-x: auto; }
@@ -1393,10 +1393,11 @@
       <h2 class="section-title">Start free.<br>Scale when it matters.</h2>
     </div>
     <div class="pricing-grid fade-up delay-1">
+      <!-- Free -->
       <div class="pricing-card">
         <div class="pricing-tier">Free</div>
-        <div class="pricing-price">0<span class="period"> /mo</span></div>
-        <p class="pricing-desc">For solo developers and open-source projects.</p>
+        <div class="pricing-price">€0<span class="period"> /mo</span></div>
+        <p class="pricing-desc">For solo developers exploring the tool.</p>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
           <li>10K requests / month</li>
@@ -1405,30 +1406,46 @@
           <li>pytest output</li>
         </ul>
       </div>
+      <!-- Hobby -->
+      <div class="pricing-card" style="position:relative">
+        <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
+        <div class="pricing-tier">Hobby</div>
+        <div class="pricing-price"><span class="currency">€</span>19<span class="period"> /mo</span></div>
+        <p class="pricing-desc">For side projects with real users.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>250K requests / month</li>
+          <li>2 services</li>
+          <li>Auto-generated fixtures</li>
+          <li>Email support</li>
+        </ul>
+      </div>
+      <!-- Starter -->
       <div class="pricing-card" style="position:relative">
         <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
         <div class="pricing-tier">Starter</div>
-        <div class="pricing-price"><span class="currency">€</span>99<span class="period"> /mo</span></div>
+        <div class="pricing-price"><span class="currency">€</span>79<span class="period"> /mo</span></div>
         <p class="pricing-desc">For early-stage startups shipping fast.</p>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
           <li>1M requests / month</li>
-          <li>3 services</li>
+          <li>5 services</li>
           <li>GitHub PR integration</li>
           <li>Auto-generated fixtures</li>
           <li>Email support</li>
         </ul>
       </div>
+      <!-- Growth -->
       <div class="pricing-card popular" style="position:relative">
         <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
         <div class="popular-badge">Most Popular</div>
         <div class="pricing-tier">Growth</div>
-        <div class="pricing-price"><span class="currency">€</span>499<span class="period"> /mo</span></div>
+        <div class="pricing-price"><span class="currency">€</span>399<span class="period"> /mo</span></div>
         <p class="pricing-desc">For scale-ups with real traffic and real stakes.</p>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
           <li>10M requests / month</li>
-          <li>10 services</li>
+          <li>15 services</li>
           <li>Slack alerts</li>
           <li>PII compliance guarantee</li>
           <li>Jest & RSpec output</li>
@@ -1436,6 +1453,7 @@
           <li>Priority support</li>
         </ul>
       </div>
+      <!-- Enterprise -->
       <div class="pricing-card" style="position:relative">
         <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
         <div class="pricing-tier">Enterprise</div>
