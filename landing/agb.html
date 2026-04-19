@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGB — Httrace</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080808; --bg-2: #0e0e0e;
+    --border: #1f1f1f; --text: #f0f0f0;
+    --text-muted: #666; --text-dim: #999;
+    --accent: #3b82f6;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 60px; border-bottom: 1px solid var(--border); }
+  .nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--text); }
+  .nav-logo span { color: var(--accent); }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 64px 24px 120px; }
+  h1 { font-size: 36px; margin-bottom: 8px; }
+  .subtitle { color: var(--text-muted); font-size: 14px; font-family: var(--font-mono); margin-bottom: 48px; }
+  h2 { font-size: 20px; margin-top: 48px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  p { color: var(--text-dim); margin-bottom: 12px; }
+  ul { color: var(--text-dim); padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 6px; }
+  .placeholder {
+    background: #f59e0b18; border: 1px solid #f59e0b44;
+    border-radius: 6px; padding: 2px 8px;
+    color: #f59e0b; font-family: var(--font-mono); font-size: 13px;
+  }
+  .notice {
+    background: var(--bg-2); border: 1px solid #f59e0b44;
+    border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0;
+    padding: 16px 20px; margin-bottom: 40px; font-size: 14px; color: var(--text-dim);
+  }
+  .notice strong { color: #f59e0b; }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; }
+  footer a { color: var(--text-muted); font-size: 14px; margin: 0 12px; }
+  footer a:hover { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">htt<span>race</span></a>
+</nav>
+
+<div class="container">
+  <h1>Allgemeine Geschäftsbedingungen</h1>
+  <p class="subtitle">Stand: April 2026</p>
+
+  <div style="display:inline-flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:12px;color:#666;margin-bottom:32px;">
+    <a href="/agb.html" style="color:var(--accent);border-bottom:1px solid var(--accent);padding-bottom:1px;">Deutsch</a>
+    <span>·</span>
+    <a href="/terms.html" style="color:#666;border-bottom:1px solid #1f1f1f;padding-bottom:1px;">English</a>
+  </div>
+
+  <div class="notice">
+    <strong>⚠ Hinweis:</strong> Diese AGB sollten vor dem offiziellen Launch von einem Anwalt geprüft werden.
+  </div>
+
+  <h2>§ 1 Geltungsbereich</h2>
+  <p>
+    Diese Allgemeinen Geschäftsbedingungen gelten für alle Verträge zwischen
+    Arik Wittlich, Bassener Dorfstraße 19, 28876 Oyten, Deutschland
+    (nachfolgend „Anbieter") und den Nutzern des Dienstes Httrace (nachfolgend „Kunde").
+  </p>
+  <p>
+    Abweichende Bedingungen des Kunden werden nicht anerkannt, es sei denn,
+    der Anbieter stimmt ihrer Geltung ausdrücklich schriftlich zu.
+  </p>
+
+  <h2>§ 2 Leistungsbeschreibung</h2>
+  <p>Httrace ist ein Software-as-a-Service-Produkt, das folgende Leistungen erbringt:</p>
+  <ul>
+    <li>Capture von anonymisierten HTTP-Anfragen und -Antworten über eine Middleware-Integration</li>
+    <li>Automatische Generierung von Integrationstests (pytest, Jest, RSpec) aus dem erfassten Traffic</li>
+    <li>Bereitstellung einer API zur Steuerung und Abfrage des Dienstes</li>
+    <li>Webbasiertes Dashboard zur Übersicht (sofern verfügbar)</li>
+  </ul>
+  <p>
+    Der genaue Leistungsumfang ergibt sich aus dem zum Zeitpunkt des Vertragsschlusses
+    gültigen Preisplan auf <a href="https://httrace.com/pricing">httrace.com/pricing</a>.
+  </p>
+
+  <h2>§ 3 Vertragsschluss und Laufzeit</h2>
+  <p>
+    Der Vertrag kommt zustande, wenn der Kunde sich registriert und einen Plan auswählt
+    oder — im Falle des kostenlosen Plans — den Dienst durch Nutzung des API-Schlüssels verwendet.
+  </p>
+  <p>
+    Der kostenlose Plan läuft auf unbestimmte Zeit und kann jederzeit ohne Frist beendet werden.
+    Kostenpflichtige Pläne laufen monatlich und verlängern sich automatisch, sofern sie nicht
+    bis zum Ende der Laufzeit gekündigt werden.
+  </p>
+
+  <h2>§ 4 Preise und Zahlung</h2>
+  <p>
+    Die jeweils aktuellen Preise sind auf <a href="https://httrace.com/#pricing">httrace.com/#pricing</a>
+    einsichtlich. Alle Preise verstehen sich netto zzgl. der gesetzlichen Umsatzsteuer,
+    sofern nicht anders angegeben.
+  </p>
+  <p>
+    Die Zahlung erfolgt monatlich im Voraus via Stripe. Bei Zahlungsverzug behält sich
+    der Anbieter vor, den Zugang zum Dienst zu sperren.
+  </p>
+
+  <h2>§ 5 Kündigung</h2>
+  <p>
+    Der Kunde kann seinen Vertrag jederzeit zum Ende des laufenden Abrechnungsmonats kündigen,
+    indem er sich an <a href="mailto:founders@httrace.com">founders@httrace.com</a> wendet.
+    Eine anteilige Rückerstattung bereits geleisteter Zahlungen erfolgt nicht.
+  </p>
+  <p>
+    Der Anbieter kann den Vertrag mit einer Frist von 30 Tagen ohne Angabe von Gründen kündigen.
+    Bei schwerwiegenden Verstößen gegen diese AGB ist eine fristlose Kündigung möglich.
+  </p>
+
+  <h2>§ 6 Pflichten des Kunden</h2>
+  <p>Der Kunde verpflichtet sich:</p>
+  <ul>
+    <li>Den API-Schlüssel geheim zu halten und nicht an Dritte weiterzugeben.</li>
+    <li>Den Dienst nur im Rahmen des erworbenen Plans zu nutzen.</li>
+    <li>Keine Daten einzuspeisen, die gegen geltendes Recht verstoßen.</li>
+    <li>Sicherzustellen, dass die Nutzung des Capture-Middleware mit dem eigenen Datenschutzkonzept vereinbar ist und ggf. eigene Nutzer entsprechend informiert werden.</li>
+    <li>Den Dienst nicht zu missbrauchen (z.B. durch automatisierte Angriffe, Scraping oder übermäßige Last).</li>
+  </ul>
+
+  <h2>§ 7 Verfügbarkeit</h2>
+  <p>
+    Der Anbieter strebt eine Verfügbarkeit des Dienstes von 99 % im Jahresmittel an.
+    Hiervon ausgenommen sind angekündigte Wartungsarbeiten sowie Ausfälle, die außerhalb
+    des Einflussbereichs des Anbieters liegen (höhere Gewalt, Ausfall von Drittanbietern).
+  </p>
+  <p>
+    Ein Rechtsanspruch auf eine bestimmte Verfügbarkeit besteht nur, soweit dies
+    ausdrücklich im Preisplan (z.B. Enterprise SLA) vereinbart wurde.
+  </p>
+
+  <h2>§ 8 Datenschutz und Vertraulichkeit</h2>
+  <p>
+    Der Anbieter verarbeitet Kundendaten ausschließlich zur Erbringung des Dienstes
+    und gemäß der <a href="/datenschutz.html">Datenschutzerklärung</a>.
+    HTTP-Payload-Daten werden durch automatische PII-Filterung anonymisiert,
+    bevor sie den Server des Kunden verlassen.
+  </p>
+  <p>
+    Auf Wunsch kann ein Auftragsverarbeitungsvertrag (AVV) gemäß Art. 28 DSGVO
+    abgeschlossen werden. Anfragen an: <a href="mailto:founders@httrace.com">founders@httrace.com</a>
+  </p>
+
+  <h2>§ 9 Haftungsbeschränkung</h2>
+  <p>
+    Der Anbieter haftet uneingeschränkt für Schäden aus der Verletzung des Lebens,
+    des Körpers oder der Gesundheit sowie für vorsätzliche oder grob fahrlässige
+    Pflichtverletzungen.
+  </p>
+  <p>
+    Im Übrigen ist die Haftung des Anbieters auf den vertragstypisch vorhersehbaren Schaden
+    begrenzt. Die Haftung für entgangenen Gewinn, mittelbare Schäden und Folgeschäden ist
+    ausgeschlossen, soweit gesetzlich zulässig.
+  </p>
+  <p>
+    Die Gesamthaftung des Anbieters gegenüber dem Kunden ist auf den Betrag begrenzt,
+    den der Kunde in den letzten 12 Monaten vor dem schadensbegründenden Ereignis
+    für den Dienst gezahlt hat.
+  </p>
+
+  <h2>§ 10 Änderungen der AGB</h2>
+  <p>
+    Der Anbieter behält sich vor, diese AGB mit einer Frist von 30 Tagen zu ändern.
+    Änderungen werden per E-Mail an die hinterlegte Adresse mitgeteilt.
+    Widerspricht der Kunde nicht innerhalb von 30 Tagen, gelten die neuen AGB als angenommen.
+  </p>
+
+  <h2>§ 11 Schlussbestimmungen</h2>
+  <p>
+    Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.
+    Gerichtsstand ist, soweit gesetzlich zulässig, Oyten.
+  </p>
+  <p>
+    Sollten einzelne Bestimmungen dieser AGB unwirksam sein, bleibt der Vertrag im Übrigen wirksam.
+  </p>
+</div>
+
+<footer>
+  <a href="/">Home</a>
+  <a href="/impressum.html">Impressum</a>
+  <a href="/datenschutz.html">Datenschutz</a>
+  <a href="/privacy.html">Privacy Policy</a>
+  <a href="/agb.html">AGB</a>
+  <a href="/terms.html">Terms</a>
+</footer>
+
+</body>
+</html>

@@ -505,6 +505,29 @@
     font-family: var(--font-mono);
   }
 
+  .coming-soon-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8,8,8,0.65);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0;
+    z-index: 2;
+  }
+  .coming-soon-badge {
+    background: var(--bg-3);
+    border: 1px solid var(--border-2);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
   /* ── INVESTOR ── */
   #investor { background: var(--bg); }
   .investor-card {
@@ -1266,6 +1289,7 @@
           <tr>
             <th>Feature</th>
             <th class="col-httrace">Httrace</th>
+            <th>Keploy</th>
             <th>Speedscale</th>
             <th>GoReplay</th>
           </tr>
@@ -1274,36 +1298,70 @@
           <tr>
             <td>Generates real test code (not just replay)</td>
             <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="cross">✕</span></td>
           </tr>
           <tr>
-            <td>No Kubernetes required</td>
+            <td>No root / kernel access required</td>
             <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="partial">eBPF mode only</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="check">✓</span></td>
           </tr>
           <tr>
+            <td>No Kubernetes required</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>Managed SaaS (no self-hosting)</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
             <td>PII sanitization built-in</td>
             <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
             <td><span class="partial">Partial</span></td>
             <td><span class="cross">✕</span></td>
           </tr>
           <tr>
-            <td>State & fixture generation</td>
+            <td>Auto-generated test fixtures</td>
             <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="partial">Partial</span></td>
             <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>GitHub Actions integration</td>
+            <td class="col-httrace"><span class="partial">Coming soon</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="partial">Partial</span></td>
             <td><span class="cross">✕</span></td>
           </tr>
           <tr>
             <td>Works with pytest / Jest / RSpec</td>
             <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="partial">Go / JS only</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="cross">✕</span></td>
           </tr>
           <tr>
+            <td>EU data residency (GDPR)</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="partial">Self-hosted only</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="partial">Self-hosted only</span></td>
+          </tr>
+          <tr>
             <td>Free tier available</td>
             <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="check">✓</span></td>
           </tr>
@@ -1333,7 +1391,8 @@
           <li>pytest output</li>
         </ul>
       </div>
-      <div class="pricing-card">
+      <div class="pricing-card" style="position:relative">
+        <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
         <div class="pricing-tier">Starter</div>
         <div class="pricing-price"><span class="currency">€</span>99<span class="period"> /mo</span></div>
         <p class="pricing-desc">For early-stage startups shipping fast.</p>
@@ -1341,11 +1400,13 @@
         <ul class="pricing-features">
           <li>1M requests / month</li>
           <li>3 services</li>
-          <li>GitHub PR comments with test diffs</li>
+          <li>GitHub PR integration</li>
+          <li>Auto-generated fixtures</li>
           <li>Email support</li>
         </ul>
       </div>
-      <div class="pricing-card popular">
+      <div class="pricing-card popular" style="position:relative">
+        <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
         <div class="popular-badge">Most Popular</div>
         <div class="pricing-tier">Growth</div>
         <div class="pricing-price"><span class="currency">€</span>499<span class="period"> /mo</span></div>
@@ -1357,10 +1418,12 @@
           <li>Slack alerts</li>
           <li>PII compliance guarantee</li>
           <li>Jest & RSpec output</li>
+          <li>VS Code extension</li>
           <li>Priority support</li>
         </ul>
       </div>
-      <div class="pricing-card">
+      <div class="pricing-card" style="position:relative">
+        <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
         <div class="pricing-tier">Enterprise</div>
         <div class="pricing-price" style="font-size:28px">from <span class="currency" style="font-size:16px">€</span>2,000<span class="period"> /mo</span></div>
         <p class="pricing-desc">For teams that need control, compliance, and SLAs.</p>
@@ -1539,8 +1602,13 @@
     <div class="footer-links">
       <a href="#how">Product</a>
       <a href="#pricing">Pricing</a>
-      <a href="https://docs.httrace.com" target="_blank" rel="noopener">Docs</a>
+      <a href="docs/">Docs</a>
       <a href="https://github.com/httrace-io/httrace" target="_blank" rel="noopener">GitHub</a>
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="agb.html">AGB</a>
+      <a href="terms.html">Terms</a>
     </div>
   </div>
 </footer>

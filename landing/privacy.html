@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — Httrace</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080808; --bg-2: #0e0e0e;
+    --border: #1f1f1f; --text: #f0f0f0;
+    --text-muted: #666; --text-dim: #999;
+    --accent: #3b82f6;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 60px; border-bottom: 1px solid var(--border); }
+  .nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--text); }
+  .nav-logo span { color: var(--accent); }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 64px 24px 120px; }
+  h1 { font-size: 36px; margin-bottom: 8px; }
+  .subtitle { color: var(--text-muted); font-size: 14px; font-family: var(--font-mono); margin-bottom: 48px; }
+  h2 { font-size: 20px; margin-top: 48px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 16px; margin-top: 24px; margin-bottom: 8px; color: var(--text-dim); }
+  p { color: var(--text-dim); margin-bottom: 12px; }
+  ul { color: var(--text-dim); padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .lang-switch {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
+    margin-bottom: 32px;
+  }
+  .lang-switch a { color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 1px; }
+  .lang-switch a.active { color: var(--accent); border-color: var(--accent); }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; }
+  footer a { color: var(--text-muted); font-size: 14px; margin: 0 12px; }
+  footer a:hover { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">htt<span>race</span></a>
+</nav>
+
+<div class="container">
+  <h1>Privacy Policy</h1>
+  <p class="subtitle">Last updated: April 2026 — pursuant to GDPR (EU) 2016/679</p>
+
+  <div class="lang-switch">
+    <a href="/privacy.html" class="active">English</a>
+    <span>·</span>
+    <a href="/datenschutz.html">Deutsch</a>
+  </div>
+
+  <h2>1. Data Controller</h2>
+  <p>
+    The data controller within the meaning of the GDPR is:<br><br>
+    Arik Wittlich<br>
+    Bassener Dorfstraße 19<br>
+    28876 Oyten<br>
+    Germany<br><br>
+    Email: <a href="mailto:founders@httrace.com">founders@httrace.com</a>
+  </p>
+
+  <h2>2. Data We Collect</h2>
+
+  <h3>2.1 Waitlist Sign-Up</h3>
+  <p>When you join the waitlist, we store:</p>
+  <table>
+    <thead><tr><th>Data</th><th>Purpose</th><th>Legal Basis</th><th>Retention</th></tr></thead>
+    <tbody>
+      <tr><td>Email address</td><td>Notify you about beta access and product updates</td><td>Art. 6(1)(a) GDPR (consent)</td><td>Until unsubscribe or on request</td></tr>
+      <tr><td>Sign-up timestamp</td><td>Determine waitlist order</td><td>Art. 6(1)(f) GDPR (legitimate interest)</td><td>Same as email address</td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 Service Usage (Customers)</h3>
+  <p>When you use Httrace as a product, we process the following data under the contract:</p>
+  <ul>
+    <li>HTTP requests and responses from your API (anonymized — PII is removed before transmission)</li>
+    <li>API key and associated email address</li>
+    <li>Usage statistics (number of requests processed per month)</li>
+  </ul>
+  <p>Legal basis: Art. 6(1)(b) GDPR (performance of a contract)</p>
+
+  <h3>2.3 Website Analytics (Plausible Analytics)</h3>
+  <p>
+    We use <strong>Plausible Analytics</strong> for privacy-friendly website analytics.
+    Plausible sets <strong>no cookies</strong>, creates no user profiles, and collects no personal data.
+    Only anonymized aggregate data (page views, countries, browsers) is processed.
+  </p>
+  <p>
+    Provider: Plausible Analytics, Grubenstraße 10, 10627 Berlin (EU servers).<br>
+    More info: <a href="https://plausible.io/data-policy" target="_blank" rel="noopener">plausible.io/data-policy</a>
+  </p>
+
+  <h2>3. Sharing with Third Parties</h2>
+  <p>We do not share your data with third parties, except:</p>
+  <ul>
+    <li><strong>Resend</strong> (email delivery) — for sending notifications. EU servers. Privacy policy: <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener">resend.com/legal/privacy-policy</a></li>
+    <li><strong>Fly.io</strong> (server hosting) — our servers run in Frankfurt (EU). Privacy policy: <a href="https://fly.io/legal/privacy-policy" target="_blank" rel="noopener">fly.io/legal/privacy-policy</a></li>
+    <li>When required to do so by law.</li>
+  </ul>
+
+  <h2>4. Data Storage and Security</h2>
+  <p>
+    All data is stored on servers in Frankfurt, Germany (EU).
+    All transmissions are encrypted via TLS 1.3.
+    Data at rest is encrypted with AES-256.
+  </p>
+  <p>
+    HTTP payload data is scrubbed before transmission by automatic PII filtering
+    (passwords, tokens, credit card numbers, email addresses, etc. are replaced with placeholders).
+    Raw payloads are not stored permanently.
+  </p>
+
+  <h2>5. Your Rights (GDPR Art. 15–21)</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li><strong>Access</strong> — what data we have stored about you (Art. 15)</li>
+    <li><strong>Rectification</strong> — correction of incorrect data (Art. 16)</li>
+    <li><strong>Erasure</strong> — "right to be forgotten" (Art. 17)</li>
+    <li><strong>Restriction of processing</strong> (Art. 18)</li>
+    <li><strong>Objection</strong> to processing (Art. 21)</li>
+    <li><strong>Data portability</strong> (Art. 20)</li>
+    <li><strong>Withdrawal</strong> of consent previously given (Art. 7(3))</li>
+  </ul>
+  <p>
+    To exercise these rights, contact us at:
+    <a href="mailto:founders@httrace.com">founders@httrace.com</a>
+  </p>
+  <p>
+    You also have the right to lodge a complaint with the competent supervisory authority.
+    The authority responsible for our registered address is:<br>
+    Der Landesbeauftragte für den Datenschutz Niedersachsen (LfD Niedersachsen),
+    Prinzenstraße 5, 30159 Hannover,
+    <a href="https://lfd.niedersachsen.de" target="_blank" rel="noopener">lfd.niedersachsen.de</a>
+  </p>
+
+  <h2>6. Unsubscribe from Waitlist</h2>
+  <p>
+    To be removed from the waitlist and have your data deleted,
+    email <a href="mailto:founders@httrace.com">founders@httrace.com</a>
+    with the subject "Delete waitlist". We will remove your data within 7 business days.
+  </p>
+
+  <h2>7. Cookies</h2>
+  <p>
+    This website uses <strong>no tracking cookies</strong>.
+    Plausible Analytics is cookieless. Technically necessary session data
+    is held in memory only and not set persistently.
+  </p>
+
+  <h2>8. Changes to This Privacy Policy</h2>
+  <p>
+    We reserve the right to update this privacy policy as needed.
+    The current version is always available on this page.
+    Active users will be notified by email of material changes.
+  </p>
+</div>
+
+<footer>
+  <a href="/">Home</a>
+  <a href="/impressum.html">Impressum</a>
+  <a href="/datenschutz.html">Datenschutz</a>
+  <a href="/privacy.html">Privacy Policy</a>
+  <a href="/agb.html">AGB</a>
+  <a href="/terms.html">Terms</a>
+</footer>
+
+</body>
+</html>

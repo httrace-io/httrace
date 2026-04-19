@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — Httrace</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080808; --bg-2: #0e0e0e;
+    --border: #1f1f1f; --text: #f0f0f0;
+    --text-muted: #666; --text-dim: #999;
+    --accent: #3b82f6;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 16px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 60px; border-bottom: 1px solid var(--border); }
+  .nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--text); }
+  .nav-logo span { color: var(--accent); }
+
+  .container { max-width: 760px; margin: 0 auto; padding: 64px 24px 120px; }
+  h1 { font-size: 36px; margin-bottom: 8px; }
+  .subtitle { color: var(--text-muted); font-size: 14px; font-family: var(--font-mono); margin-bottom: 48px; }
+  h2 { font-size: 20px; margin-top: 48px; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+  p { color: var(--text-dim); margin-bottom: 12px; }
+  ul { color: var(--text-dim); padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 6px; }
+  .notice {
+    background: var(--bg-2); border: 1px solid #f59e0b44;
+    border-left: 3px solid #f59e0b; border-radius: 0 8px 8px 0;
+    padding: 16px 20px; margin-bottom: 40px; font-size: 14px; color: var(--text-dim);
+  }
+  .notice strong { color: #f59e0b; }
+  .lang-switch {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
+    margin-bottom: 32px;
+  }
+  .lang-switch a { color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 1px; }
+  .lang-switch a.active { color: var(--accent); border-color: var(--accent); }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 24px; text-align: center; }
+  footer a { color: var(--text-muted); font-size: 14px; margin: 0 12px; }
+  footer a:hover { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">htt<span>race</span></a>
+</nav>
+
+<div class="container">
+  <h1>Terms of Service</h1>
+  <p class="subtitle">Last updated: April 2026</p>
+
+  <div class="lang-switch">
+    <a href="/terms.html" class="active">English</a>
+    <span>·</span>
+    <a href="/agb.html">Deutsch</a>
+  </div>
+
+  <div class="notice">
+    <strong>⚠ Note:</strong> These Terms should be reviewed by a lawyer before the official commercial launch.
+  </div>
+
+  <h2>1. Scope</h2>
+  <p>
+    These Terms of Service govern all agreements between
+    Arik Wittlich, Bassener Dorfstraße 19, 28876 Oyten, Germany
+    (hereinafter "Provider") and users of the Httrace service (hereinafter "Customer").
+  </p>
+  <p>
+    Deviating terms and conditions of the Customer are not recognized unless
+    the Provider expressly agrees to their validity in writing.
+  </p>
+
+  <h2>2. Service Description</h2>
+  <p>Httrace is a Software-as-a-Service product that provides the following:</p>
+  <ul>
+    <li>Capture of anonymized HTTP requests and responses via a middleware integration</li>
+    <li>Automatic generation of integration tests (pytest, Jest, RSpec) from captured traffic</li>
+    <li>API access for controlling and querying the service</li>
+    <li>Web-based dashboard for monitoring (where available)</li>
+  </ul>
+  <p>
+    The exact scope of services is determined by the pricing plan in effect at the time the contract
+    is concluded, as published at <a href="https://httrace.com/#pricing">httrace.com/#pricing</a>.
+  </p>
+
+  <h2>3. Contract Formation and Duration</h2>
+  <p>
+    The contract is formed when the Customer registers and selects a plan,
+    or — in the case of the free plan — when the Customer uses the service by activating an API key.
+  </p>
+  <p>
+    The free plan runs indefinitely and can be terminated at any time without notice.
+    Paid plans are billed monthly and renew automatically unless cancelled before the end of the billing period.
+  </p>
+
+  <h2>4. Prices and Payment</h2>
+  <p>
+    Current prices are listed at <a href="https://httrace.com/#pricing">httrace.com/#pricing</a>.
+    All prices are net of applicable taxes unless otherwise stated.
+  </p>
+  <p>
+    Payment is collected monthly in advance via Stripe. In the event of payment default,
+    the Provider reserves the right to suspend access to the service.
+  </p>
+
+  <h2>5. Cancellation</h2>
+  <p>
+    The Customer may cancel their subscription at any time effective at the end of the current billing month
+    by contacting <a href="mailto:founders@httrace.com">founders@httrace.com</a>.
+    No partial refunds of payments already made will be issued.
+  </p>
+  <p>
+    The Provider may terminate the contract with 30 days' notice without stating reasons.
+    Immediate termination is possible in cases of serious breach of these Terms.
+  </p>
+
+  <h2>6. Customer Obligations</h2>
+  <p>The Customer agrees to:</p>
+  <ul>
+    <li>Keep the API key confidential and not share it with third parties.</li>
+    <li>Use the service only within the scope of the purchased plan.</li>
+    <li>Not feed data into the service that violates applicable law.</li>
+    <li>Ensure that use of the capture middleware is compatible with their own data protection obligations and inform their own users accordingly where required.</li>
+    <li>Not misuse the service (e.g. through automated attacks, scraping, or excessive load).</li>
+  </ul>
+
+  <h2>7. Availability</h2>
+  <p>
+    The Provider targets 99% availability per year.
+    Exceptions include scheduled maintenance and outages beyond the Provider's control
+    (force majeure, third-party provider failures).
+  </p>
+  <p>
+    A legal right to a specific availability level only exists where expressly agreed
+    in the pricing plan (e.g. Enterprise SLA).
+  </p>
+
+  <h2>8. Privacy and Confidentiality</h2>
+  <p>
+    The Provider processes Customer data solely for the purpose of delivering the service
+    and in accordance with the <a href="/privacy.html">Privacy Policy</a>.
+    HTTP payload data is anonymized through automatic PII filtering before leaving the Customer's server.
+  </p>
+  <p>
+    A Data Processing Agreement (DPA) pursuant to Art. 28 GDPR can be concluded upon request.
+    Contact: <a href="mailto:founders@httrace.com">founders@httrace.com</a>
+  </p>
+
+  <h2>9. Limitation of Liability</h2>
+  <p>
+    The Provider is liable without limitation for damages arising from injury to life,
+    body or health, and for intentional or grossly negligent breaches of duty.
+  </p>
+  <p>
+    Otherwise, the Provider's liability is limited to foreseeable, contract-typical damages.
+    Liability for lost profits, indirect damages, and consequential damages is excluded
+    to the extent permitted by law.
+  </p>
+  <p>
+    The Provider's total liability to the Customer is capped at the amount the Customer
+    paid for the service in the 12 months preceding the event giving rise to the claim.
+  </p>
+
+  <h2>10. Changes to These Terms</h2>
+  <p>
+    The Provider reserves the right to modify these Terms with 30 days' notice.
+    Changes will be communicated by email to the address on file.
+    If the Customer does not object within 30 days, the new Terms are deemed accepted.
+  </p>
+
+  <h2>11. Governing Law and Jurisdiction</h2>
+  <p>
+    These Terms are governed by the laws of the Federal Republic of Germany,
+    excluding the UN Convention on Contracts for the International Sale of Goods (CISG).
+    Jurisdiction is, to the extent permitted by law, Oyten, Germany.
+  </p>
+  <p>
+    If any provision of these Terms is or becomes invalid, the remaining provisions remain in effect.
+  </p>
+</div>
+
+<footer>
+  <a href="/">Home</a>
+  <a href="/impressum.html">Impressum</a>
+  <a href="/datenschutz.html">Datenschutz</a>
+  <a href="/privacy.html">Privacy Policy</a>
+  <a href="/agb.html">AGB</a>
+  <a href="/terms.html">Terms</a>
+</footer>
+
+</body>
+</html>
