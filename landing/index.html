@@ -1965,6 +1965,24 @@
       if (res.ok || res.status === 201) {
         form.style.display = 'none';
         document.getElementById('success-' + id).classList.add('show');
+      } else if (res.status === 429) {
+        btn.disabled = false;
+        btn.textContent = 'Get my free API key →';
+        if (window.turnstile) window.turnstile.reset();
+        input.setCustomValidity('Too many attempts — please try again in an hour.');
+        input.reportValidity();
+        setTimeout(() => input.setCustomValidity(''), 4000);
+      } else if (res.status === 400) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.detail?.includes('CAPTCHA')
+          ? 'CAPTCHA check failed — please try again.'
+          : 'Something went wrong — please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Get my free API key →';
+        if (window.turnstile) window.turnstile.reset();
+        input.setCustomValidity(msg);
+        input.reportValidity();
+        setTimeout(() => input.setCustomValidity(''), 4000);
       } else {
         throw new Error('Server error');
       }
