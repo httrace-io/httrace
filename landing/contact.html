@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Httrace</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="canonical" href="https://httrace.com/contact.html">
+<meta name="description" content="Get in touch with the Httrace team. Questions about the product, partnerships, or enterprise plans.">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #080808; --bg-2: #0e0e0e; --bg-3: #141414;
+    --border: #1f1f1f; --border-2: #2a2a2a;
+    --text: #f0f0f0; --text-muted: #666; --text-dim: #999;
+    --accent: #3b82f6; --accent-dim: rgba(59,130,246,0.10);
+    --green: #22c55e;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-body); font-size: 16px;
+    line-height: 1.7; -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025; pointer-events: none; z-index: 9999;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+  /* ── NAV ── */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; height: 64px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: rgba(8,8,8,0.9);
+    backdrop-filter: blur(12px); z-index: 100;
+  }
+  .nav-logo { font-family: var(--font-display); font-weight: 800; font-size: 18px; color: var(--text); text-decoration: none; }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { color: var(--text-muted); font-size: 14px; text-decoration: none; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-links a.active { color: var(--text); }
+
+  /* ── MAIN ── */
+  .container { max-width: 680px; margin: 0 auto; padding: 80px 24px 120px; }
+
+  .page-label {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 20px;
+  }
+  h1 { font-size: clamp(36px, 6vw, 52px); font-weight: 800; line-height: 1.05; margin-bottom: 16px; }
+  .subtitle { font-size: 18px; color: var(--text-dim); line-height: 1.65; margin-bottom: 56px; }
+
+  /* ── CONTACT CARDS ── */
+  .contact-grid { display: grid; gap: 16px; margin-bottom: 64px; }
+
+  .contact-card {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 28px 32px;
+    display: flex; align-items: flex-start; gap: 20px;
+    transition: border-color 0.2s;
+    text-decoration: none;
+  }
+  .contact-card:hover { border-color: var(--border-2); text-decoration: none; }
+  .contact-card:hover .card-arrow { color: var(--accent); }
+
+  .card-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: var(--accent-dim); border: 1px solid rgba(59,130,246,0.15);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-icon svg { width: 20px; height: 20px; stroke: var(--accent); fill: none; }
+
+  .card-body { flex: 1; }
+  .card-title { font-family: var(--font-display); font-weight: 700; font-size: 17px; color: var(--text); margin-bottom: 4px; }
+  .card-desc { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+  .card-link { font-family: var(--font-mono); font-size: 13px; color: var(--accent); margin-top: 8px; display: block; }
+  .card-arrow { color: var(--text-muted); font-size: 18px; transition: color 0.2s; margin-top: 2px; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 56px 0; }
+
+  /* ── RESPONSE TIME ── */
+  .response-note {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: var(--text-muted);
+    margin-top: 40px;
+  }
+  .dot-green { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13px; color: var(--text-muted);
+  }
+  footer a { color: var(--text-muted); }
+  footer a:hover { color: var(--text); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 20px; }
+    .nav-links { gap: 16px; }
+    .nav-links a:not(.nav-cta) { display: none; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+    .contact-card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">htt<span>race</span></a>
+  <div class="nav-links">
+    <a href="/#how">How it works</a>
+    <a href="/#pricing">Pricing</a>
+    <a href="docs/">Docs</a>
+    <a href="contact.html" class="active">Contact</a>
+  </div>
+</nav>
+
+<main class="container">
+  <div class="page-label">Contact</div>
+  <h1>Let's talk.</h1>
+  <p class="subtitle">Questions, feedback, enterprise pricing, or just want to say hello — we read everything.</p>
+
+  <div class="contact-grid">
+
+    <!-- General / Email -->
+    <a class="contact-card" href="mailto:arikwittlich@gmail.com">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      </div>
+      <div class="card-body">
+        <div class="card-title">General Inquiries</div>
+        <div class="card-desc">Questions about the product, how it works, or anything else.</div>
+        <span class="card-link">arikwittlich@gmail.com</span>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- Enterprise -->
+    <a class="contact-card" href="mailto:arikwittlich@gmail.com?subject=Enterprise%20Plan%20Inquiry">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Enterprise &amp; Custom Plans</div>
+        <div class="card-desc">On-premise deployment, SSO, custom quotas, SLA. Let's build something together.</div>
+        <span class="card-link">arikwittlich@gmail.com · Subject: Enterprise Plan</span>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <!-- GitHub -->
+    <a class="contact-card" href="https://github.com/httrace-io/httrace/issues" target="_blank" rel="noopener">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg>
+      </div>
+      <div class="card-body">
+        <div class="card-title">Bug Reports &amp; Feature Requests</div>
+        <div class="card-desc">Found something broken? Have an idea? Open an issue on GitHub.</div>
+        <span class="card-link">github.com/httrace-io/httrace/issues</span>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+  </div>
+
+  <hr class="divider">
+
+  <div class="response-note">
+    <div class="dot-green"></div>
+    We typically respond within 24 hours on business days.
+  </div>
+</main>
+
+<footer>
+  <span>© 2026 Httrace. Built for developers.</span>
+  <div style="display:flex;gap:24px">
+    <a href="/">Home</a>
+    <a href="docs/">Docs</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="impressum.html">Impressum</a>
+  </div>
+</footer>
+
+</body>
+</html>
