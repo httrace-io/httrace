@@ -158,6 +158,7 @@
     <a href="#cli" class="sidebar-link">httrace generate</a>
     <a href="#cli-status" class="sidebar-link">httrace status</a>
     <a href="#cli-diff" class="sidebar-link">httrace diff</a>
+    <a href="#cli-replay" class="sidebar-link">httrace replay</a>
 
     <div class="sidebar-section" style="margin-top:20px">Frameworks</div>
     <a href="#fastapi" class="sidebar-link">FastAPI</a>
@@ -165,18 +166,24 @@
     <a href="#flask" class="sidebar-link">Flask</a>
     <a href="#starlette" class="sidebar-link">Starlette</a>
 
-    <div class="sidebar-section" style="margin-top:20px">Advanced</div>
+    <div class="sidebar-section" style="margin-top:20px">Features</div>
     <a href="#test-formats" class="sidebar-link">Test formats</a>
     <a href="#github-actions" class="sidebar-link">GitHub Actions</a>
     <a href="#openapi" class="sidebar-link">OpenAPI export</a>
     <a href="#coverage-api" class="sidebar-link">Coverage API</a>
+    <a href="#alerts" class="sidebar-link">Anomaly alerts</a>
+    <a href="#replay" class="sidebar-link">Replay testing</a>
+
+    <div class="sidebar-section" style="margin-top:20px">Team & Tooling</div>
+    <a href="#teams" class="sidebar-link">Teams & orgs</a>
+    <a href="#vscode" class="sidebar-link">VS Code extension</a>
   </aside>
 
   <!-- Content -->
   <main class="docs-content">
 
     <div>
-      <span class="badge badge-green">v0.1.1</span>&nbsp;
+      <span class="badge badge-green">v0.2.0</span>&nbsp;
       <span class="badge badge-blue">Python 3.9+</span>&nbsp;
       <span class="badge badge-yellow">Private Beta</span>
     </div>
@@ -354,6 +361,37 @@ Options:
     <pre><span class="pr">$</span> httrace diff --fail-on-breaking
 <span class="cm"># Exits 0 if no changes, 1 if breaking changes or new untested endpoints</span></pre>
 
+    <h3 id="cli-replay">httrace replay</h3>
+    <p>Replay captured traffic against a target URL and compare responses. Useful for validating staging environments or checking for regressions before deployment.</p>
+    <pre><span class="pr">$</span> httrace replay [OPTIONS]
+
+Options:
+  --target   -t  Target base URL to replay against (required)
+  --service  -s  Service name (overrides config)
+  --limit    -n  Number of recent captures to replay (default: 50, max: 200)
+  --timeout      Per-request timeout in seconds (default: 10.0)
+  --fail-on-diff Exit code 1 if any differences detected
+  --output   -o  table | json  (default: table)</pre>
+
+    <p>Example:</p>
+    <pre><span class="pr">$</span> httrace replay --target https://staging.myapp.com --service my-api
+
+<span class="cm">Replaying 50 captures against https://staging.myapp.com …</span>
+
+╭──────────────────┬──────────┬─────────────────────────────╮
+│ Endpoint         │ Status   │ Notes                       │
+├──────────────────┼──────────┼─────────────────────────────┤
+│ GET /api/users   │ <span class="ok">✓ match</span> │                             │
+│ POST /orders     │ <span class="ok">✓ match</span> │                             │
+│ DELETE /items/42 │ <span class="fn">✗ diff</span>  │ 200 → 404 (status mismatch) │
+╰──────────────────┴──────────┴─────────────────────────────╯
+
+<span class="cm">49/50 passed  (1 difference, 3420ms total)</span></pre>
+
+    <p>In CI, combine <code>--fail-on-diff</code> with the GitHub Actions workflow to block deployments when staging diverges from production behaviour:</p>
+    <pre><span class="pr">$</span> httrace replay --target $STAGING_URL --fail-on-diff
+<span class="cm"># Exits 1 if any status code or response schema differs from production captures</span></pre>
+
     <!-- FRAMEWORKS -->
     <h2 id="fastapi">FastAPI</h2>
     <pre><span class="kw">from</span> fastapi <span class="kw">import</span> <span class="fn">FastAPI</span>
@@ -520,6 +558,204 @@ jobs:
   ],
   "untested_endpoints": ["GET /products"]
 }</pre>
+
+    <!-- ALERTS -->
+    <h2 id="alerts">Anomaly Alerts</h2>
+    <p>Httrace can notify you via Slack or email when unusual patterns are detected in your captured traffic — spikes in error rates, latency outliers, or newly observed endpoints.</p>
+
+    <h3>Alert triggers</h3>
+    <table class="param-table">
+      <thead><tr><th>Trigger</th><th>Description</th><th>Default threshold</th></tr></thead>
+      <tbody>
+        <tr><td>error_spike</td><td>5-minute error rate rises above threshold % and doubles the hourly baseline</td><td>10%</td></tr>
+        <tr><td>latency_spike</td><td>P95 latency over 5 minutes exceeds the hourly baseline by threshold %</td><td>50%</td></tr>
+        <tr><td>new_endpoint</td><td>A path+method combination is observed for the first time</td><td>—</td></tr>
+        <tr><td>breaking_change</td><td>Response schema changes incompatibly since last test generation</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Configure via the dashboard</h3>
+    <p>Go to your <a href="../dashboard.html">dashboard</a> → <strong>Alerts</strong> tab → click <strong>+ New alert</strong>. Select the service, trigger, channel (Slack or email), and destination.</p>
+
+    <h3>Configure via the API</h3>
+    <pre><span class="cm"># Create a Slack alert for error spikes on my-api</span>
+<span class="pr">$</span> curl -X POST "https://api.httrace.com/v1/alerts" \
+  -H "Authorization: Bearer &lt;JWT&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "service":     "my-api",
+    "alert_on":    "error_spike",
+    "threshold":   10,
+    "channel":     "slack",
+    "destination": "https://hooks.slack.com/services/T.../B.../..."
+  }'</pre>
+
+    <pre><span class="cm"># Create an email alert for new endpoints</span>
+<span class="pr">$</span> curl -X POST "https://api.httrace.com/v1/alerts" \
+  -H "Authorization: Bearer &lt;JWT&gt;" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "service":     "my-api",
+    "alert_on":    "new_endpoint",
+    "channel":     "email",
+    "destination": "team@mycompany.com"
+  }'</pre>
+
+    <h3>Alert endpoints</h3>
+    <table class="param-table">
+      <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>GET</td><td>/v1/alerts</td><td>List your alert configs</td></tr>
+        <tr><td>POST</td><td>/v1/alerts</td><td>Create an alert config</td></tr>
+        <tr><td>DELETE</td><td>/v1/alerts/{id}</td><td>Delete an alert config</td></tr>
+        <tr><td>POST</td><td>/v1/alerts/test?alert_id=N</td><td>Send a test notification</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Throttling:</strong> Alerts fire at most once per hour per configuration to prevent notification spam.
+    </div>
+
+    <!-- REPLAY -->
+    <h2 id="replay">Replay Testing</h2>
+    <p>Replay testing re-sends your captured production requests to any target URL — staging, a feature branch, a refactored service — and compares the responses to what production returned. It's a zero-effort regression suite derived from real traffic.</p>
+
+    <h3>How it works</h3>
+    <ol style="margin:12px 0 12px 20px;display:flex;flex-direction:column;gap:6px;color:var(--text-dim);font-size:15px;">
+      <li>Httrace loads the N most recent captures for your service</li>
+      <li>Each captured request is replayed concurrently against the target URL</li>
+      <li>Status codes and response body structure are compared</li>
+      <li>Differences are reported endpoint-by-endpoint</li>
+    </ol>
+
+    <div class="callout warn">
+      <strong>Heads up:</strong> Replay sends real request payloads (PII-sanitized) to the target. Make sure the target is a safe environment — not production.
+    </div>
+
+    <h3>Via the CLI</h3>
+    <p>See <a href="#cli-replay"><code>httrace replay</code></a> above for the full CLI reference.</p>
+
+    <h3>Via the API</h3>
+    <pre><span class="pr">$</span> curl -X POST \
+  "https://api.httrace.com/v1/replay?service=my-api&amp;target_base_url=https://staging.myapp.com&amp;limit=50" \
+  -H "x-api-key: ht_..."</pre>
+    <pre>{
+  "total":       50,
+  "passed":      49,
+  "failed":       1,
+  "duration_ms": 3420,
+  "differences": [
+    {
+      "method":          "DELETE",
+      "path":            "/items/42",
+      "original_status": 200,
+      "replay_status":   404,
+      "status_match":    false,
+      "body_diff":       "missing key: item_id"
+    }
+  ]
+}</pre>
+
+    <!-- TEAMS -->
+    <h2 id="teams">Teams &amp; Organizations</h2>
+    <p>Organizations let multiple engineers share a set of API keys, services, and dashboard access under one account. Useful for teams where several people need to view coverage or manage alerts.</p>
+
+    <h3>Create an organization</h3>
+    <p>In your <a href="../dashboard.html">dashboard</a> → <strong>Team</strong> tab → click <strong>+ New organization</strong>, or via the API:</p>
+    <pre><span class="pr">$</span> curl -X POST "https://api.httrace.com/v1/orgs" \
+  -H "Authorization: Bearer &lt;JWT&gt;" \
+  -d '{"name": "Acme Corp"}'</pre>
+
+    <h3>Invite members</h3>
+    <pre><span class="pr">$</span> curl -X POST "https://api.httrace.com/v1/orgs/acme-corp/invite" \
+  -H "Authorization: Bearer &lt;JWT&gt;" \
+  -d '{"email": "colleague@acme.com", "role": "member"}'</pre>
+
+    <p>The invited user receives an email with a link to accept the invitation. Accepted members can view the org's dashboard, coverage, and alerts.</p>
+
+    <h3>Roles</h3>
+    <table class="param-table">
+      <thead><tr><th>Role</th><th>View dashboard</th><th>Generate tests</th><th>Manage alerts</th><th>Manage members</th></tr></thead>
+      <tbody>
+        <tr><td>owner</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>admin</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+        <tr><td>member</td><td>✓</td><td>✓</td><td>✓</td><td>—</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Org API keys</h3>
+    <p>Org-level API keys can be created for CI/CD pipelines so that no individual's personal key needs to be shared:</p>
+    <pre><span class="pr">$</span> curl -X POST "https://api.httrace.com/v1/orgs/acme-corp/api-keys" \
+  -H "Authorization: Bearer &lt;JWT&gt;" \
+  -d '{"name": "Production CI"}'</pre>
+
+    <h3>Organization endpoints</h3>
+    <table class="param-table">
+      <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>POST</td><td>/v1/orgs</td><td>Create an organization</td></tr>
+        <tr><td>GET</td><td>/v1/orgs</td><td>List your organizations</td></tr>
+        <tr><td>GET</td><td>/v1/orgs/{slug}</td><td>Get org details + members</td></tr>
+        <tr><td>POST</td><td>/v1/orgs/{slug}/invite</td><td>Invite a member</td></tr>
+        <tr><td>GET</td><td>/v1/orgs/invite/{token}</td><td>Accept an invitation (link from email)</td></tr>
+        <tr><td>DELETE</td><td>/v1/orgs/{slug}/members/{email}</td><td>Remove a member</td></tr>
+        <tr><td>GET</td><td>/v1/orgs/{slug}/api-keys</td><td>List org API keys</td></tr>
+        <tr><td>POST</td><td>/v1/orgs/{slug}/api-keys</td><td>Create an org API key</td></tr>
+        <tr><td>DELETE</td><td>/v1/orgs/{slug}/api-keys/{key_id}</td><td>Revoke an org API key</td></tr>
+      </tbody>
+    </table>
+
+    <!-- VS CODE EXTENSION -->
+    <h2 id="vscode">VS Code Extension</h2>
+    <p>The Httrace VS Code extension brings coverage data and test generation directly into your editor — without switching to the dashboard or running CLI commands.</p>
+
+    <h3>Installation</h3>
+    <p>Search for <strong>Httrace</strong> in the VS Code Extensions sidebar, or install from the command line:</p>
+    <pre><span class="pr">$</span> code --install-extension httrace.httrace-vscode</pre>
+
+    <h3>Configuration</h3>
+    <p>Open VS Code settings (<kbd>⌘,</kbd>) and search for <code>httrace</code>:</p>
+    <table class="param-table">
+      <thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>httrace.apiKey</td><td>—</td><td>Your Httrace API key (<code>ht_...</code>)</td></tr>
+        <tr><td>httrace.serviceName</td><td>—</td><td>The service to track in the current workspace</td></tr>
+        <tr><td>httrace.apiUrl</td><td>https://api.httrace.com</td><td>API base URL (for self-hosted)</td></tr>
+        <tr><td>httrace.testFormat</td><td>pytest</td><td>Output format: pytest | jest | vitest | go | rspec</td></tr>
+        <tr><td>httrace.outputDirectory</td><td>tests/integration</td><td>Directory for generated test files</td></tr>
+        <tr><td>httrace.pollIntervalSeconds</td><td>60</td><td>How often to refresh coverage data</td></tr>
+        <tr><td>httrace.showInlineDecorations</td><td>true</td><td>Show capture counts inline next to route definitions</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Commands</h3>
+    <p>Access all commands via the Command Palette (<kbd>⌘⇧P</kbd>) → type <strong>Httrace</strong>:</p>
+    <table class="param-table">
+      <thead><tr><th>Command</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Httrace: Generate Tests</td><td>Call <code>/v1/generate-tests</code> and write files to the configured output directory</td></tr>
+        <tr><td>Httrace: Show API Drift</td><td>Check for schema drift since last generation and display in the Output panel</td></tr>
+        <tr><td>Httrace: Replay Traffic</td><td>Prompt for a target URL and replay captured traffic; shows diff in Output panel</td></tr>
+        <tr><td>Httrace: Show Coverage</td><td>Open a searchable QuickPick with endpoint coverage stats</td></tr>
+        <tr><td>Httrace: Refresh Coverage</td><td>Force an immediate coverage refresh</td></tr>
+        <tr><td>Httrace: Open Settings</td><td>Jump to the Httrace settings section</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Inline decorations</h3>
+    <p>When <code>httrace.showInlineDecorations</code> is enabled, the extension scans route definition lines in the active file and annotates them with capture counts from the last refresh:</p>
+    <pre><span class="cm"># FastAPI — annotations appear after the decorator</span>
+@app.<span class="fn">get</span>(<span class="st">"/api/users"</span>)    <span class="ok">  ✓ 412 captures · tested</span>
+@app.<span class="fn">post</span>(<span class="st">"/api/orders"</span>)  <span class="ok">  ✓ 38 captures</span>
+@app.<span class="fn">delete</span>(<span class="st">"/api/items/{id}"</span>) <span class="cm">  ○ no captures</span></pre>
+
+    <p>Supported file types: Python (FastAPI / Flask), JavaScript/TypeScript (Express), Go (chi/mux), Ruby (Rails routes).</p>
+
+    <h3>Coverage tree view</h3>
+    <p>The Httrace activity bar panel shows all tracked endpoints grouped by HTTP method, with capture counts and test status. Click the beaker icon (🧪) in the activity bar to open it.</p>
+
+    <h3>Status bar</h3>
+    <p>The status bar item in the bottom-right shows the current endpoint + capture count and refreshes on the configured poll interval. Click it to open the Coverage QuickPick.</p>
 
     <div style="margin-top:64px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:13px;display:flex;justify-content:space-between;align-items:center;">
       <span>© 2026 Httrace</span>
