@@ -157,12 +157,19 @@
     <a href="#generate" class="sidebar-link">Generate tests</a>
     <a href="#cli" class="sidebar-link">httrace generate</a>
     <a href="#cli-status" class="sidebar-link">httrace status</a>
+    <a href="#cli-diff" class="sidebar-link">httrace diff</a>
 
     <div class="sidebar-section" style="margin-top:20px">Frameworks</div>
     <a href="#fastapi" class="sidebar-link">FastAPI</a>
     <a href="#django" class="sidebar-link">Django</a>
     <a href="#flask" class="sidebar-link">Flask</a>
     <a href="#starlette" class="sidebar-link">Starlette</a>
+
+    <div class="sidebar-section" style="margin-top:20px">Advanced</div>
+    <a href="#test-formats" class="sidebar-link">Test formats</a>
+    <a href="#github-actions" class="sidebar-link">GitHub Actions</a>
+    <a href="#openapi" class="sidebar-link">OpenAPI export</a>
+    <a href="#coverage-api" class="sidebar-link">Coverage API</a>
   </aside>
 
   <!-- Content -->
@@ -287,8 +294,31 @@ Options:
 
     <!-- CLI -->
     <h2 id="cli">CLI Reference</h2>
+
+    <h3 id="cli-generate">httrace generate</h3>
+    <p>Generate test files from captured traffic. Supports 5 output formats:</p>
+    <pre><span class="pr">$</span> httrace generate [OPTIONS]
+
+Options:
+  --format    pytest | jest | vitest | go | rspec  (default: pytest)
+  --output    Output directory  (default: ./tests/integration)
+  --dry-run   Preview output without writing files</pre>
+
+    <p>Examples:</p>
+    <pre><span class="cm"># Generate pytest tests (default)</span>
+<span class="pr">$</span> httrace generate
+
+<span class="cm"># Generate Jest tests</span>
+<span class="pr">$</span> httrace generate --format jest --output tests/
+
+<span class="cm"># Generate Go tests</span>
+<span class="pr">$</span> httrace generate --format go --output ./integration_tests/
+
+<span class="cm"># Preview without writing</span>
+<span class="pr">$</span> httrace generate --format rspec --dry-run</pre>
+
     <h3 id="cli-status">httrace status</h3>
-    <p>Check how much traffic has been captured for each service:</p>
+    <p>Check how much traffic has been captured and which endpoints have coverage:</p>
     <pre><span class="pr">$</span> httrace status
 
 Service: my-api
@@ -296,6 +326,33 @@ Service: my-api
   Endpoints tracked: 12
   Tests already generated: 34
   Plan usage: 8,432 / 1,000,000 requests</pre>
+
+    <h3 id="cli-diff">httrace diff</h3>
+    <p>Detect API schema drift since the last time tests were generated. Use <code>--fail-on-breaking</code> in CI pipelines to block deployments when breaking changes are detected:</p>
+    <pre><span class="pr">$</span> httrace diff [OPTIONS]
+
+Options:
+  --service          Service name (overrides config)
+  --fail-on-breaking Exit code 1 if breaking changes detected
+  --output           table | json  (default: table)</pre>
+
+    <p>Example output:</p>
+    <pre><span class="pr">$</span> httrace diff --service my-api
+
+╭─────────────────────────────────────────────────────╮
+│  API Drift — my-api                                 │
+├──────────────────┬─────────────────┬───────────────┤
+│ Endpoint         │ Change type     │ Detail        │
+├──────────────────┼─────────────────┼───────────────┤
+│ POST /orders     │ schema          │ +coupon_code  │
+│ GET /products    │ new endpoint    │ No tests yet  │
+╰──────────────────┴─────────────────┴──���────────────╯
+
+<span class="cm">2 changes detected</span></pre>
+
+    <p>Use in CI with <code>--fail-on-breaking</code> to fail the pipeline on breaking schema changes:</p>
+    <pre><span class="pr">$</span> httrace diff --fail-on-breaking
+<span class="cm"># Exits 0 if no changes, 1 if breaking changes or new untested endpoints</span></pre>
 
     <!-- FRAMEWORKS -->
     <h2 id="fastapi">FastAPI</h2>
@@ -336,6 +393,133 @@ app <span class="pr">=</span> <span class="fn">Starlette</span>(middleware<span 
     <span class="fn">Middleware</span>(<span class="fn">HttraceCaptureMiddleware</span>,
         api_key<span class="pr">=</span>os.environ[<span class="st">"HTTRACE_API_KEY"</span>], service<span class="pr">=</span><span class="st">"my-api"</span>),
 ])</pre>
+
+    <!-- TEST FORMATS -->
+    <h2 id="test-formats">Test Formats</h2>
+    <p>Httrace can generate tests in 5 different frameworks. All formats are generated from the same captured traffic — just pick the one that matches your stack.</p>
+
+    <table class="param-table">
+      <thead><tr><th>Format</th><th>Flag</th><th>Output file</th><th>Runtime</th></tr></thead>
+      <tbody>
+        <tr><td>pytest</td><td><code>--format pytest</code></td><td>test_*.py</td><td>Python / pytest</td></tr>
+        <tr><td>jest</td><td><code>--format jest</code></td><td>*.test.js</td><td>Node.js / Jest</td></tr>
+        <tr><td>vitest</td><td><code>--format vitest</code></td><td>*.test.ts</td><td>TypeScript / Vitest</td></tr>
+        <tr><td>go</td><td><code>--format go</code></td><td>*_test.go</td><td>Go / testing + testify</td></tr>
+        <tr><td>rspec</td><td><code>--format rspec</code></td><td>*_spec.rb</td><td>Ruby / RSpec</td></tr>
+      </tbody>
+    </table>
+
+    <p>Example — Jest output for <code>GET /api/users</code>:</p>
+    <pre><span class="cm">// Generated by Httrace — 12 interactions captured</span>
+<span class="cm">// DO NOT EDIT — re-run `httrace generate` to update</span>
+<span class="kw">const</span> axios = <span class="fn">require</span>(<span class="st">'axios'</span>);
+<span class="kw">const</span> BASE_URL = process.env.BASE_URL || <span class="st">'http://localhost:8000'</span>;
+
+<span class="fn">describe</span>(<span class="st">'GET /api/users'</span>, () =&gt; {
+  <span class="fn">test</span>(<span class="st">'GET /api/users returns 200'</span>, <span class="kw">async</span> () =&gt; {
+    <span class="kw">const</span> response = <span class="kw">await</span> <span class="fn">axios</span>({ method: <span class="st">'get'</span>, url: `${BASE_URL}/api/users`, validateStatus: () =&gt; <span class="kw">true</span> });
+    <span class="fn">expect</span>(response.status).<span class="fn">toBe</span>(<span class="nu">200</span>);
+    <span class="fn">expect</span>(response.data.total).<span class="fn">toBe</span>(<span class="nu">1</span>);
+    <span class="fn">expect</span>(<span class="fn">Array</span>.isArray(response.data.users)).<span class="fn">toBe</span>(<span class="kw">true</span>);
+  });
+});</pre>
+
+    <!-- GITHUB ACTIONS -->
+    <h2 id="github-actions">GitHub Actions Integration</h2>
+    <p>Httrace integrates with GitHub Actions to automatically check for API schema drift on every push or pull request. The <code>httrace diff</code> command exits with code <code>1</code> if breaking changes are detected, which fails the CI pipeline.</p>
+
+    <p>Download a ready-to-use workflow file from your dashboard, or generate it via the API:</p>
+    <pre><span class="pr">$</span> curl "https://api.httrace.com/v1/github-actions?service=my-api" \
+  -H "x-api-key: ht_..." \
+  -o .github/workflows/httrace.yml</pre>
+
+    <p>The generated workflow file:</p>
+    <pre>name: Httrace API Drift Check
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  httrace-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install httrace
+      - run: httrace diff --service my-api --fail-on-breaking
+        env:
+          HTTRACE_API_KEY: ${{ secrets.HTTRACE_API_KEY }}</pre>
+
+    <div class="callout">
+      <strong>Setup:</strong> Add your Httrace API key as a GitHub Actions secret named <code>HTTRACE_API_KEY</code> under your repo's Settings → Secrets.
+    </div>
+
+    <!-- OPENAPI -->
+    <h2 id="openapi">OpenAPI Export</h2>
+    <p>Httrace can infer an OpenAPI 3.0 specification from your captured traffic. The schema is built from real request/response shapes — not from decorators or annotations.</p>
+
+    <pre><span class="cm"># Download as YAML</span>
+<span class="pr">$</span> curl "https://api.httrace.com/v1/openapi.yaml?service=my-api" \
+  -H "x-api-key: ht_..." -o openapi.yaml
+
+<span class="cm"># Or JSON</span>
+<span class="pr">$</span> curl "https://api.httrace.com/v1/openapi.json?service=my-api" \
+  -H "x-api-key: ht_..." -o openapi.json</pre>
+
+    <p>The spec includes:</p>
+    <ul style="margin:12px 0 12px 20px;display:flex;flex-direction:column;gap:6px;color:var(--text-dim);font-size:15px;">
+      <li>All observed paths and HTTP methods</li>
+      <li>Request body schemas inferred from real payloads</li>
+      <li>Response schemas per status code</li>
+      <li>Path parameters (auto-detected from numeric URL segments)</li>
+      <li>Security scheme hints (Bearer token detected from headers)</li>
+    </ul>
+
+    <div class="callout warn">
+      <strong>Note:</strong> The generated spec is a starting point. Review and enrich it with descriptions, examples, and auth details before publishing.
+    </div>
+
+    <!-- COVERAGE API -->
+    <h2 id="coverage-api">Coverage &amp; Changes API</h2>
+    <p>These endpoints power the Coverage and API Drift sections in the dashboard, and are also usable directly.</p>
+
+    <h3>GET /v1/coverage</h3>
+    <p>Returns all observed endpoints and capture counts for a service.</p>
+    <pre><span class="pr">$</span> curl "https://api.httrace.com/v1/coverage?service=my-api" \
+  -H "x-api-key: ht_..."</pre>
+    <pre>{
+  "service": "my-api",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/api/users",
+      "captures": 412,
+      "statuses": [200, 401]
+    }
+  ],
+  "total_captures": 8432
+}</pre>
+
+    <h3>GET /v1/changes</h3>
+    <p>Returns schema changes since the last time tests were generated. Useful for detecting breaking changes before deployment.</p>
+    <pre><span class="pr">$</span> curl "https://api.httrace.com/v1/changes?service=my-api" \
+  -H "x-api-key: ht_..."</pre>
+    <pre>{
+  "changes": [
+    {
+      "endpoint": "POST /orders",
+      "changes": [
+        { "type": "schema", "detail": "new field: coupon_code" }
+      ]
+    }
+  ],
+  "untested_endpoints": ["GET /products"]
+}</pre>
 
     <div style="margin-top:64px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:13px;display:flex;justify-content:space-between;align-items:center;">
       <span>© 2026 Httrace</span>

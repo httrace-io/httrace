@@ -959,7 +959,18 @@
     .footer-links { flex-wrap: wrap; justify-content: center; gap: 16px; }
   }
 
+  @media (max-width: 700px) {
+    /* Feature grid — 2 cols on tablets */
+    #features .container > div[style*="grid-template-columns:repeat(3"] {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
+
   @media (max-width: 480px) {
+    /* Feature grid — 1 col on phones */
+    #features .container > div[style*="grid-template-columns:repeat(3"] {
+      grid-template-columns: 1fr !important;
+    }
     /* Pricing — single column on very small screens */
     .pricing-grid { grid-template-columns: 1fr; }
 
@@ -1495,6 +1506,48 @@
   </div>
 </section>
 
+<!-- ── FEATURES ── -->
+<section id="features" style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="fade-up" style="text-align:center;margin-bottom:48px;">
+      <div class="label section-label">What's included</div>
+      <h2 class="section-title">Everything your test suite needs.</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;" class="fade-up delay-1">
+      <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:28px;">
+        <div style="font-size:22px;margin-bottom:12px;">🔀</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:8px;">5 test frameworks</div>
+        <div style="font-size:14px;color:var(--text-muted);line-height:1.6;">Generate pytest, Jest, Vitest, Go, or RSpec — all from the same captured traffic. Switch formats any time.</div>
+      </div>
+      <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:28px;">
+        <div style="font-size:22px;margin-bottom:12px;">⚡</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:8px;">GitHub Actions in 1 line</div>
+        <div style="font-size:14px;color:var(--text-muted);line-height:1.6;"><code style="font-size:12px;">httrace diff --fail-on-breaking</code> — fails your build automatically when breaking API changes are detected.</div>
+      </div>
+      <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:28px;">
+        <div style="font-size:22px;margin-bottom:12px;">📡</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:8px;">API drift detection</div>
+        <div style="font-size:14px;color:var(--text-muted);line-height:1.6;">See exactly which endpoints changed since your last test generation. Never ship untested schema changes again.</div>
+      </div>
+      <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:28px;">
+        <div style="font-size:22px;margin-bottom:12px;">📄</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:8px;">OpenAPI spec from traffic</div>
+        <div style="font-size:14px;color:var(--text-muted);line-height:1.6;">Auto-generate an OpenAPI 3.0 spec from real request/response shapes. No decorators, no annotations needed.</div>
+      </div>
+      <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:28px;">
+        <div style="font-size:22px;margin-bottom:12px;">🛡️</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:8px;">PII sanitization</div>
+        <div style="font-size:14px;color:var(--text-muted);line-height:1.6;">Emails, tokens, passwords, and card numbers are redacted before capture. EU servers, GDPR compliant by default.</div>
+      </div>
+      <div style="background:var(--bg-2);border:1px solid var(--border);border-radius:12px;padding:28px;">
+        <div style="font-size:22px;margin-bottom:12px;">🧩</div>
+        <div style="font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:8px;">Works with your stack</div>
+        <div style="font-size:14px;color:var(--text-muted);line-height:1.6;">FastAPI, Django, Flask, Express, Rails. One pip install, one middleware line — no infrastructure changes required.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── COMPARISON ── -->
 <section id="compare">
   <div class="container">
@@ -1559,16 +1612,30 @@
           </tr>
           <tr>
             <td>GitHub Actions integration</td>
-            <td class="col-httrace"><span class="partial">Coming soon</span></td>
+            <td class="col-httrace"><span class="check">✓</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="partial">Partial</span></td>
             <td><span class="cross">✕</span></td>
           </tr>
           <tr>
             <td>Works with pytest / Jest / RSpec</td>
-            <td class="col-httrace"><span class="check">✓</span></td>
+            <td class="col-httrace"><span class="check">✓ 5 frameworks</span></td>
             <td><span class="partial">Go / JS only</span></td>
             <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>API drift detection</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="partial">Partial</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>OpenAPI spec generation</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="partial">Partial</span></td>
             <td><span class="cross">✕</span></td>
           </tr>
           <tr>
