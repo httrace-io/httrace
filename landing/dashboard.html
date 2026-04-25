@@ -108,6 +108,14 @@
   .usage-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.8s ease; }
   .usage-bar-fill.warn { background: var(--yellow); }
   .usage-bar-fill.danger { background: var(--red); }
+  .plan-limits-row {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    margin-top: 16px; padding-top: 16px;
+    border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-muted); font-family: var(--font-mono);
+  }
+  .plan-limit-item { display: flex; align-items: center; gap: 6px; }
+  .plan-limit-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 
   /* ── TABLES ── */
   .section { margin-bottom: 32px; }
@@ -211,6 +219,7 @@
       <div class="stat-card">
         <div class="stat-label">Plan</div>
         <div class="stat-value" id="stat-plan">—</div>
+        <div class="stat-sub" id="stat-plan-limits"></div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Requests this month</div>
@@ -237,7 +246,7 @@
       </div>
     </div>
 
-    <!-- Usage bar -->
+    <!-- Usage bar + plan limits -->
     <div class="usage-section">
       <div class="section-title">Monthly Usage</div>
       <div class="usage-bar-wrap">
@@ -248,6 +257,7 @@
         <div class="usage-bar-track">
           <div class="usage-bar-fill" id="usage-bar" style="width: 0%"></div>
         </div>
+        <div class="plan-limits-row" id="plan-limits-row"></div>
       </div>
     </div>
 
@@ -436,11 +446,23 @@ async function load() {
 
     // Stats
     document.getElementById('stat-plan').innerHTML =
-      `<span class="plan-badge">${me.plan}</span>`;
+      `<span class="plan-badge">${me.plan_label || me.plan}</span>`;
+    document.getElementById('stat-plan-limits').textContent =
+      me.limits ? `${me.limits.requests_per_month} req/mo · ${me.limits.services} service${me.limits.services === '1' ? '' : 's'}` : '';
     document.getElementById('stat-requests').textContent = fmt(me.usage.requests_captured);
     document.getElementById('stat-quota').textContent = `of ${fmt(me.usage.quota)} / month`;
     document.getElementById('stat-captures').textContent = fmt(me.stats.total_captures);
     document.getElementById('stat-tests').textContent = fmt(me.stats.total_tests_generated);
+
+    // Plan limits row under usage bar
+    if (me.limits) {
+      document.getElementById('plan-limits-row').innerHTML = `
+        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${me.limits.requests_per_month} requests / month</span>
+        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${me.limits.services} service${me.limits.services === '1' ? '' : 's'}</span>
+        <span class="plan-limit-item"><span class="plan-limit-dot"></span>pytest output</span>
+        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${me.plan === 'free' ? 'No credit card' : 'Full access'}</span>
+      `;
+    }
 
     // API key — store real key, show masked by default
     _realApiKey = me.api_key;
