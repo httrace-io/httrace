@@ -1451,7 +1451,7 @@
           <span class="hl-cm"># Welcome to Httrace!</span><br><br>
           Your API key:<br>
           <div class="api-key-pill"><div class="api-key-dot"></div>ht_Kx9mTqL2vRpN7wYdBcAeJf3Z</div><br>
-          Plan: <span class="hl-ok">Free</span> · 10 000 requests / month<br><br>
+          Plan: <span class="hl-ok">Free</span> · 100 000 requests / month<br><br>
           <span class="hl-cm"># Keep this key secret.</span><br>
           <span class="hl-cm"># Store it as an env variable:</span><br><br>
           <span class="prompt">$</span> export <span class="hl-key">HTTRACE_API_KEY</span>=<span class="hl-str">ht_Kx9mTqL2...</span>
@@ -1498,7 +1498,7 @@
           POST &nbsp;/orders &nbsp;&nbsp;&nbsp;&nbsp;<span class="hl-ok">38 captures</span> &nbsp;200 201 422<br>
           GET &nbsp;&nbsp;/products &nbsp;&nbsp;<span class="hl-ok">91 captures</span> &nbsp;200 404<br>
           POST &nbsp;/auth/login <span class="hl-ok">14 captures</span> &nbsp;200 401<br><br>
-          Plan: <span class="hl-ok">Free</span> · <span class="hl-num">143</span> / 10 000 used this month<br>
+          Plan: <span class="hl-ok">Free</span> · <span class="hl-num">143</span> / 100 000 used this month<br>
           <a href="#pricing" style="color:var(--accent);text-decoration:none">→ Upgrade for more</a>
         </div>
       </div>
@@ -1673,10 +1673,10 @@
         <p class="pricing-desc">For solo developers exploring the tool.</p>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
-          <li>10K requests / month</li>
+          <li>100K requests / month</li>
           <li>1 service</li>
+          <li>All 5 test formats</li>
           <li>Community support</li>
-          <li>pytest output</li>
         </ul>
       </div>
       <!-- Hobby -->
@@ -1687,8 +1687,9 @@
         <p class="pricing-desc">For side projects with real users.</p>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
-          <li>250K requests / month</li>
-          <li>2 services</li>
+          <li>500K requests / month</li>
+          <li>3 services</li>
+          <li>All 5 test formats</li>
           <li>Auto-generated fixtures</li>
           <li>Email support</li>
         </ul>
@@ -1701,11 +1702,29 @@
         <p class="pricing-desc">For early-stage startups shipping fast.</p>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
-          <li>1M requests / month</li>
+          <li>2M requests / month</li>
           <li>5 services</li>
-          <li>GitHub PR integration</li>
-          <li>Auto-generated fixtures</li>
+          <li>All 5 test formats</li>
+          <li>GitHub Actions integration</li>
+          <li>API drift detection</li>
           <li>Email support</li>
+        </ul>
+      </div>
+      <!-- Pro -->
+      <div class="pricing-card" style="position:relative">
+        <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
+        <div class="pricing-tier">Pro</div>
+        <div class="pricing-price"><span class="currency">€</span>149<span class="period"> /mo</span></div>
+        <p class="pricing-desc">For growing teams that need more headroom.</p>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>5M requests / month</li>
+          <li>10 services</li>
+          <li>All 5 test formats</li>
+          <li>Slack &amp; email alerts</li>
+          <li>Replay testing</li>
+          <li>OpenAPI export</li>
+          <li>Priority support</li>
         </ul>
       </div>
       <!-- Growth -->
@@ -1713,16 +1732,16 @@
         <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
         <div class="popular-badge">Most Popular</div>
         <div class="pricing-tier">Growth</div>
-        <div class="pricing-price"><span class="currency">€</span>399<span class="period"> /mo</span></div>
+        <div class="pricing-price"><span class="currency">€</span>299<span class="period"> /mo</span></div>
         <p class="pricing-desc">For scale-ups with real traffic and real stakes.</p>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
-          <li>10M requests / month</li>
-          <li>15 services</li>
-          <li>Slack alerts</li>
+          <li>20M requests / month</li>
+          <li>Unlimited services</li>
+          <li>All 5 test formats</li>
           <li>PII compliance guarantee</li>
-          <li>Jest & RSpec output</li>
           <li>VS Code extension</li>
+          <li>Team management</li>
           <li>Priority support</li>
         </ul>
       </div>
@@ -1730,7 +1749,7 @@
       <div class="pricing-card" style="position:relative">
         <div class="coming-soon-overlay"><span class="coming-soon-badge">Coming soon</span></div>
         <div class="pricing-tier">Enterprise</div>
-        <div class="pricing-price" style="font-size:28px">from <span class="currency" style="font-size:16px">€</span>2,000<span class="period"> /mo</span></div>
+        <div class="pricing-price" style="font-size:28px">from <span class="currency" style="font-size:16px">€</span>1,500<span class="period"> /mo</span></div>
         <p class="pricing-desc">For teams that need control, compliance, and SLAs.</p>
         <div class="pricing-divider"></div>
         <ul class="pricing-features">
@@ -1842,14 +1861,14 @@
           Which test frameworks are supported as output?
           <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-        <div class="faq-answer">pytest (Python) is fully supported today with fixture generation, parametrize decorators, and httpx/requests client support. Jest (JavaScript) and RSpec (Ruby) are available on the Growth and Enterprise plans. More output targets are coming — vote on the <a href="https://github.com/httrace-io/httrace" target="_blank" style="color:var(--accent)">GitHub repo</a>.</div>
+        <div class="faq-answer">All five test formats are supported on every plan: pytest (Python), Jest and Vitest (JavaScript/TypeScript), Go testing + testify, and RSpec (Ruby). Fixture generation, parametrize decorators, and proper imports are included in each output. Switch formats any time with the <code style="font-family:var(--font-mono);font-size:0.9em">--format</code> flag.</div>
       </div>
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this)">
           Is there a free plan?
           <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
-        <div class="faq-answer">Yes. The Free plan includes 10,000 captured requests per month, 1 service, and community support — forever. No credit card required. It's designed for solo developers and side projects who want to try Httrace without commitment.</div>
+        <div class="faq-answer">Yes. The Free plan includes 100,000 captured requests per month, 1 service, all 5 test formats, and community support — forever. No credit card required. It's designed for solo developers and side projects that want to experience the full value of Httrace before committing.</div>
       </div>
     </div>
   </div>
@@ -1907,7 +1926,7 @@
       <div class="waitlist-success" id="success-bottom">
         ✓ Account created! Redirecting to your dashboard…
       </div>
-      <p class="waitlist-note">Free plan: 10,000 requests/month · No credit card · Cancel anytime</p>
+      <p class="waitlist-note">Free plan: 100,000 requests/month · No credit card · Cancel anytime</p>
     </div>
   </div>
 </section>
