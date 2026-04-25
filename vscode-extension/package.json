@@ -1,0 +1,182 @@
+{
+  "name": "httrace-vscode",
+  "displayName": "Httrace — HTTP Coverage",
+  "description": "Generate integration tests from production traffic. See endpoint coverage, check API drift, and replay requests — all from your editor.",
+  "version": "0.2.0",
+  "publisher": "httrace",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/httrace-io/httrace"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Testing",
+    "Other"
+  ],
+  "keywords": [
+    "httrace",
+    "http",
+    "testing",
+    "coverage",
+    "pytest",
+    "integration-tests",
+    "api-drift"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "httrace.generateTests",
+        "title": "Generate Integration Tests",
+        "category": "Httrace",
+        "icon": "$(beaker)"
+      },
+      {
+        "command": "httrace.showDiff",
+        "title": "Show API Drift",
+        "category": "Httrace",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "httrace.replayTraffic",
+        "title": "Replay Traffic",
+        "category": "Httrace",
+        "icon": "$(play)"
+      },
+      {
+        "command": "httrace.showCoverage",
+        "title": "Show Endpoint Coverage",
+        "category": "Httrace",
+        "icon": "$(shield)"
+      },
+      {
+        "command": "httrace.configure",
+        "title": "Configure API Key",
+        "category": "Httrace",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "httrace.refreshCoverage",
+        "title": "Refresh Coverage",
+        "category": "Httrace",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "httrace.generateTests",
+          "when": "resourceLangId == python || resourceLangId == javascript || resourceLangId == typescript",
+          "group": "httrace"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "httrace.generateTests"
+        },
+        {
+          "command": "httrace.showDiff"
+        },
+        {
+          "command": "httrace.replayTraffic"
+        },
+        {
+          "command": "httrace.showCoverage"
+        },
+        {
+          "command": "httrace.configure"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Httrace",
+      "properties": {
+        "httrace.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Your Httrace API key (starts with ht_). Find it at httrace.com/dashboard.",
+          "scope": "window"
+        },
+        "httrace.apiUrl": {
+          "type": "string",
+          "default": "https://api.httrace.com",
+          "description": "Base URL of the Httrace API. Change this if you self-host.",
+          "scope": "window"
+        },
+        "httrace.serviceName": {
+          "type": "string",
+          "default": "",
+          "description": "Service name to fetch coverage for (must match the name used when capturing traffic).",
+          "scope": "window"
+        },
+        "httrace.testFormat": {
+          "type": "string",
+          "default": "pytest",
+          "enum": ["pytest", "jest", "vitest", "go", "rspec"],
+          "description": "Test format to generate.",
+          "scope": "window"
+        },
+        "httrace.outputDirectory": {
+          "type": "string",
+          "default": "tests/integration",
+          "description": "Output directory for generated test files (relative to workspace root).",
+          "scope": "window"
+        },
+        "httrace.pollIntervalSeconds": {
+          "type": "number",
+          "default": 60,
+          "minimum": 10,
+          "description": "How often (in seconds) to refresh coverage data from the Httrace API.",
+          "scope": "window"
+        },
+        "httrace.showInlineDecorations": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline '✓ N captures' decorations next to route definitions.",
+          "scope": "window"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "httrace",
+          "title": "Httrace",
+          "icon": "$(beaker)"
+        }
+      ]
+    },
+    "views": {
+      "httrace": [
+        {
+          "id": "httrace.coverageView",
+          "name": "Endpoint Coverage",
+          "type": "tree"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/node": "^18.0.0",
+    "typescript": "^5.3.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "@vscode/vsce": "^2.0.0"
+  }
+}
