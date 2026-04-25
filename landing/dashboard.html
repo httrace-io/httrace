@@ -165,53 +165,63 @@
   }
 
   /* ── PLAN STAT CARD UPGRADE ── */
-  .stat-plan-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .stat-upgrade-btn {
-    font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em;
-    color: var(--accent); background: var(--accent-dim);
-    border: 1px solid rgba(59,130,246,0.25); border-radius: 6px;
-    padding: 4px 10px; cursor: pointer; transition: all 0.15s;
-    white-space: nowrap; flex-shrink: 0;
+  .plan-stat-card {
+    display: flex; flex-direction: column;
   }
-  .stat-upgrade-btn:hover { background: rgba(59,130,246,0.18); border-color: rgba(59,130,246,0.5); }
+  .plan-stat-card .stat-sub {
+    flex: 1;
+  }
+  .stat-upgrade-btn {
+    display: block; width: 100%;
+    margin-top: 14px; padding: 9px 0 0;
+    background: none; border: none;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted); font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.06em; text-align: left; cursor: pointer;
+    transition: color 0.18s;
+  }
+  .stat-upgrade-btn:hover { color: var(--accent); }
   .stat-upgrade-btn.hidden { display: none; }
 
   /* ── UPGRADE MODAL ── */
   .upgrade-modal-overlay {
     display: none; position: fixed; inset: 0; z-index: 500;
-    background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+    background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
     align-items: center; justify-content: center; padding: 24px;
   }
   .upgrade-modal-overlay.open { display: flex; }
   .upgrade-modal {
     background: var(--bg-2); border: 1px solid var(--border-2);
-    border-radius: 16px; padding: 32px;
-    max-width: 900px; width: 100%;
+    border-radius: 20px; padding: 36px;
+    max-width: 980px; width: 100%;
     max-height: 90vh; overflow-y: auto;
-    animation: modal-in 0.2s ease;
+    animation: modal-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
   }
   @keyframes modal-in {
-    from { opacity: 0; transform: translateY(16px) scale(0.98); }
+    from { opacity: 0; transform: translateY(24px) scale(0.96); }
     to   { opacity: 1; transform: translateY(0) scale(1); }
   }
   .upgrade-modal-header {
     display: flex; align-items: flex-start; justify-content: space-between;
-    margin-bottom: 24px; gap: 12px;
+    margin-bottom: 28px; gap: 12px;
   }
   .upgrade-modal-title {
-    font-family: var(--font-display); font-size: 22px; font-weight: 800;
-    letter-spacing: -0.02em;
+    font-family: var(--font-display); font-size: 24px; font-weight: 800;
+    letter-spacing: -0.03em;
   }
   .upgrade-modal-sub {
-    font-size: 13px; color: var(--text-muted); margin-top: 4px;
+    font-size: 13px; color: var(--text-muted); margin-top: 5px;
+    font-family: var(--font-mono);
   }
   .upgrade-modal-close {
-    background: var(--bg-3); border: 1px solid var(--border-2);
-    color: var(--text-muted); font-size: 16px; width: 32px; height: 32px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--text-muted); font-size: 14px; width: 30px; height: 30px;
     border-radius: 8px; cursor: pointer; display: flex; align-items: center;
     justify-content: center; flex-shrink: 0; transition: all 0.15s;
+    line-height: 1;
   }
-  .upgrade-modal-close:hover { color: var(--text); border-color: var(--border); }
+  .upgrade-modal-close:hover { color: var(--text); border-color: var(--border-2); background: var(--bg-3); }
 
   /* ── PLAN BADGE ── */
   .plan-badge {
@@ -224,61 +234,119 @@
   /* ── PLAN UPGRADE ── */
   .upgrade-section { margin-bottom: 32px; }
   .plan-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
   }
-  @media (max-width: 900px) { .plan-grid { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px) { .plan-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 1050px) { .plan-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px)  { .plan-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 460px)  { .plan-grid { grid-template-columns: 1fr; } }
+
   .plan-card {
-    background: var(--bg-2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 20px; position: relative;
-    transition: border-color 0.2s;
+    background: var(--bg-3); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px 18px; position: relative;
+    display: flex; flex-direction: column;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    cursor: default;
+  }
+  .plan-card:not(.current):hover {
+    border-color: var(--border-2);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.35);
   }
   .plan-card.current {
-    border-color: var(--accent);
-    background: linear-gradient(135deg, var(--bg-2) 0%, rgba(59,130,246,0.04) 100%);
+    border-color: rgba(59,130,246,0.45);
+    background: linear-gradient(160deg,
+      rgba(59,130,246,0.07) 0%,
+      var(--bg-3) 60%
+    );
+    box-shadow: 0 0 0 1px rgba(59,130,246,0.12) inset,
+                0 4px 24px rgba(59,130,246,0.08);
   }
+  .plan-card.popular-card {
+    border-color: rgba(245,158,11,0.3);
+  }
+  .plan-card.popular-card:not(.current):hover {
+    border-color: rgba(245,158,11,0.5);
+  }
+
   .plan-card-name {
-    font-family: var(--font-display); font-size: 15px; font-weight: 700;
-    margin-bottom: 4px;
+    font-family: var(--font-display); font-size: 13px; font-weight: 700;
+    letter-spacing: 0.01em; margin-bottom: 12px; color: var(--text-dim);
+    text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em;
   }
   .plan-card-price {
-    font-family: var(--font-mono); font-size: 22px; font-weight: 400;
-    color: var(--text); margin-bottom: 16px; line-height: 1.2;
+    font-family: var(--font-display); font-size: 28px; font-weight: 800;
+    color: var(--text); line-height: 1; letter-spacing: -0.03em;
+    margin-bottom: 2px;
   }
-  .plan-card-price span { font-size: 12px; color: var(--text-muted); }
+  .plan-card-price.price-from { font-size: 20px; }
+  .plan-card-period {
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .plan-card-divider {
+    height: 1px; background: var(--border); margin-bottom: 14px;
+  }
   .plan-card-features {
-    list-style: none; display: flex; flex-direction: column; gap: 6px;
-    margin-bottom: 20px;
+    list-style: none; display: flex; flex-direction: column; gap: 7px;
+    margin-bottom: 20px; flex: 1;
   }
   .plan-card-features li {
-    font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-dim); display: flex;
+    align-items: baseline; gap: 7px; line-height: 1.4;
   }
   .plan-card-features li::before {
-    content: ''; width: 5px; height: 5px; border-radius: 50%;
-    background: var(--accent); flex-shrink: 0;
+    content: '✓'; font-size: 10px; color: var(--accent);
+    flex-shrink: 0; font-weight: 700; margin-top: 1px;
   }
+  .plan-card.current .plan-card-features li::before { color: #60a5fa; }
+  .plan-card.popular-card .plan-card-features li::before { color: var(--yellow); }
+
   .plan-current-tag {
-    position: absolute; top: 12px; right: 12px;
-    font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--accent);
-    background: var(--accent-dim); border: 1px solid rgba(59,130,246,0.2);
-    padding: 2px 8px; border-radius: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
+    position: absolute; top: 13px; right: 13px;
+    font-family: var(--font-mono); font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--accent);
+    background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.2);
+    padding: 3px 8px; border-radius: 20px;
   }
+  .plan-current-tag::before { content: '●'; font-size: 6px; }
+
   .plan-upgrade-btn {
-    width: 100%; padding: 9px 0;
-    background: var(--accent); color: #fff;
-    font-family: var(--font-display); font-size: 13px; font-weight: 700;
-    border: none; border-radius: 7px; cursor: pointer;
-    transition: opacity 0.15s;
+    width: 100%; padding: 9px 0; margin-top: auto;
+    background: rgba(59,130,246,0.12); color: var(--accent);
+    font-family: var(--font-mono); font-size: 12px; font-weight: 400;
+    letter-spacing: 0.04em;
+    border: 1px solid rgba(59,130,246,0.2); border-radius: 8px;
+    cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
   }
-  .plan-upgrade-btn:hover { opacity: 0.85; }
+  .plan-upgrade-btn:hover {
+    background: rgba(59,130,246,0.22); border-color: rgba(59,130,246,0.4);
+    color: #93c5fd;
+  }
   .plan-upgrade-btn.current-btn {
     background: transparent; color: var(--text-muted);
-    border: 1px solid var(--border-2); cursor: default;
+    border: 1px solid var(--border); cursor: default; opacity: 0.6;
   }
   .plan-upgrade-btn.soon-btn {
-    background: var(--bg-3); color: var(--text-muted);
-    border: 1px solid var(--border-2); cursor: default;
+    background: transparent; color: var(--text-muted);
+    border: 1px dashed var(--border); cursor: default;
+    font-style: italic;
+  }
+  .plan-upgrade-btn.talk-btn {
+    background: transparent; color: var(--text-dim);
+    border: 1px solid var(--border-2); text-decoration: none;
+    display: block; text-align: center; line-height: 2.4;
+  }
+  .plan-upgrade-btn.talk-btn:hover {
+    background: var(--bg-4); color: var(--text); border-color: var(--border);
+  }
+  .plan-popular-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    position: absolute; top: 13px; right: 13px;
+    font-family: var(--font-mono); font-size: 9px; text-transform: uppercase;
+    letter-spacing: 0.12em; color: var(--yellow);
+    background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);
+    padding: 3px 8px; border-radius: 20px;
   }
 
   /* ── COVERAGE & CHANGES ── */
@@ -407,13 +475,11 @@
 
     <!-- Stats grid -->
     <div class="stats-grid">
-      <div class="stat-card">
+      <div class="stat-card plan-stat-card">
         <div class="stat-label">Plan</div>
-        <div class="stat-plan-row">
-          <div class="stat-value" id="stat-plan">—</div>
-          <button class="stat-upgrade-btn" id="stat-upgrade-btn" onclick="openUpgradeModal()">Upgrade →</button>
-        </div>
+        <div class="stat-value" id="stat-plan">—</div>
         <div class="stat-sub" id="stat-plan-limits"></div>
+        <button class="stat-upgrade-btn" id="stat-upgrade-btn" onclick="openUpgradeModal()">Upgrade plan ↗</button>
       </div>
       <div class="stat-card">
         <div class="stat-label">Requests this month</div>
@@ -457,7 +523,10 @@
 
     <!-- Plan upgrade -->
     <div class="upgrade-section">
-      <div class="section-title">Plan &amp; Subscription</div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+        <div class="section-title" style="margin-bottom:0">Plans &amp; Pricing</div>
+        <a href="https://httrace.com/#pricing" target="_blank" style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);text-decoration:none;letter-spacing:0.04em;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">Full pricing page ↗</a>
+      </div>
       <div class="plan-grid" id="plan-grid">
         <!-- populated by JS -->
       </div>
@@ -634,8 +703,8 @@
   <div class="upgrade-modal">
     <div class="upgrade-modal-header">
       <div>
-        <div class="upgrade-modal-title">Upgrade your plan</div>
-        <div class="upgrade-modal-sub">Choose the plan that fits your scale.</div>
+        <div class="upgrade-modal-title">Plans &amp; Pricing</div>
+        <div class="upgrade-modal-sub">Prices match httrace.com — all plans include all 5 test formats.</div>
       </div>
       <button class="upgrade-modal-close" onclick="closeUpgradeModal()">✕</button>
     </div>
@@ -759,34 +828,52 @@ function renderTests(tests) {
 }
 
 // ── Plan grid ─────────────────────────────────────────────────────────────
+// Prices and features are canonical — must match httrace.com/pricing
 
 const PLANS = [
   {
     id: 'free',
     name: 'Free',
     price: '€0',
+    priceSuffix: '',
     period: '/ month',
+    desc: 'For solo devs exploring the tool.',
     features: [
-      '10,000 req / month',
+      '10K requests / month',
       '1 service',
-      'pytest · Jest · Go · RSpec · Vitest',
+      'All 5 test formats',
       'API drift detection',
-      'OpenAPI export',
       'Community support',
     ],
     available: true,
   },
   {
+    id: 'hobby',
+    name: 'Hobby',
+    price: '€19',
+    priceSuffix: '',
+    period: '/ month',
+    desc: 'For side projects with real users.',
+    features: [
+      '250K requests / month',
+      '2 services',
+      'Auto-generated fixtures',
+      'Email support',
+    ],
+    available: false,
+  },
+  {
     id: 'starter',
     name: 'Starter',
-    price: '€99',
+    price: '€79',
+    priceSuffix: '',
     period: '/ month',
+    desc: 'For early-stage startups shipping fast.',
     features: [
-      '1M req / month',
-      '3 services',
-      'All 5 test formats',
+      '1M requests / month',
+      '5 services',
       'GitHub Actions integration',
-      'OpenAPI export',
+      'Auto-generated fixtures',
       'Email support',
     ],
     available: false,
@@ -794,15 +881,17 @@ const PLANS = [
   {
     id: 'growth',
     name: 'Growth',
-    price: '€499',
+    price: '€399',
+    priceSuffix: '',
     period: '/ month',
+    desc: 'For scale-ups with real traffic.',
     features: [
-      '10M req / month',
-      '10 services',
-      'All 5 test formats',
+      '10M requests / month',
+      '15 services',
       'Slack & email alerts',
+      'PII compliance guarantee',
       'Replay testing',
-      'PII guarantees',
+      'VS Code extension',
       'Priority support',
     ],
     available: false,
@@ -811,14 +900,17 @@ const PLANS = [
   {
     id: 'enterprise',
     name: 'Enterprise',
-    price: 'Custom',
-    period: '',
+    price: '€2,000',
+    priceSuffix: '+',
+    period: '/ month',
+    desc: 'For teams that need control and SLAs.',
     features: [
       'Unlimited requests',
-      'Unlimited services',
       'On-premise option',
       'SSO / SAML',
-      'Dedicated support + SLA',
+      '99.9% SLA',
+      'Dedicated support',
+      'Custom data retention',
     ],
     available: false,
     cta: 'Talk to us',
@@ -829,25 +921,37 @@ const PLANS = [
 function _buildPlanGrid(currentPlan) {
   return PLANS.map(plan => {
     const isCurrent = plan.id === currentPlan;
-    const features = plan.features.map(f => `<li>${f}</li>`).join('');
+    const features  = plan.features.map(f => `<li>${f}</li>`).join('');
+    const cardClass = [
+      'plan-card',
+      isCurrent     ? 'current'      : '',
+      plan.popular  ? 'popular-card' : '',
+    ].filter(Boolean).join(' ');
 
     let btnHtml;
     if (isCurrent) {
       btnHtml = `<button class="plan-upgrade-btn current-btn" disabled>Current plan</button>`;
     } else if (plan.ctaHref) {
-      btnHtml = `<a href="${plan.ctaHref}" class="plan-upgrade-btn" style="display:block;text-align:center;text-decoration:none;">${plan.cta || 'Talk to us'}</a>`;
+      btnHtml = `<a href="${plan.ctaHref}" class="plan-upgrade-btn talk-btn">${plan.cta || 'Talk to us'}</a>`;
     } else if (!plan.available) {
       btnHtml = `<button class="plan-upgrade-btn soon-btn" disabled>Coming soon</button>`;
     } else {
-      btnHtml = `<button class="plan-upgrade-btn" onclick="handleUpgrade('${plan.id}')">Upgrade</button>`;
+      btnHtml = `<button class="plan-upgrade-btn" onclick="handleUpgrade('${plan.id}')">Upgrade →</button>`;
     }
 
+    const tagHtml = isCurrent
+      ? `<span class="plan-current-tag">Active</span>`
+      : plan.popular
+        ? `<span class="plan-popular-tag">Popular</span>`
+        : '';
+
     return `
-      <div class="plan-card${isCurrent ? ' current' : ''}">
-        ${isCurrent ? `<span class="plan-current-tag">Current</span>` : ''}
-        ${plan.popular && !isCurrent ? `<span class="plan-current-tag" style="color:var(--yellow);background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.2);">Popular</span>` : ''}
+      <div class="${cardClass}">
+        ${tagHtml}
         <div class="plan-card-name">${plan.name}</div>
-        <div class="plan-card-price">${plan.price}<span>${plan.period}</span></div>
+        <div class="plan-card-price${plan.priceSuffix ? ' price-from' : ''}">${plan.price}<span style="font-size:14px;font-weight:400;color:var(--text-muted)">${plan.priceSuffix}</span></div>
+        <div class="plan-card-period">${plan.period}</div>
+        <div class="plan-card-divider"></div>
         <ul class="plan-card-features">${features}</ul>
         ${btnHtml}
       </div>`;
@@ -859,12 +963,21 @@ function renderPlanGrid(currentPlan) {
   document.getElementById('plan-grid').innerHTML = html;
   document.getElementById('plan-grid-modal').innerHTML = html;
 
-  // Show/hide upgrade button: hide it if user is already on the highest paid plan
+  // Hide the upgrade button only for enterprise (highest plan)
   const btn = document.getElementById('stat-upgrade-btn');
   if (currentPlan === 'enterprise') {
     btn.classList.add('hidden');
   } else {
     btn.classList.remove('hidden');
+  }
+
+  // Show plan name in the stat card upgrade button label
+  const planObj = PLANS.find(p => p.id === currentPlan);
+  const nextPlan = planObj ? PLANS[PLANS.indexOf(planObj) + 1] : null;
+  if (btn && nextPlan) {
+    btn.textContent = `Upgrade to ${nextPlan.name} ↗`;
+  } else if (btn) {
+    btn.textContent = 'View plans ↗';
   }
 }
 
