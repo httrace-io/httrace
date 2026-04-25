@@ -1798,17 +1798,13 @@
       <h2 class="waitlist-title">Start capturing<br>traffic today.</h2>
       <p class="waitlist-sub">Enter your email — we'll send your free API key instantly. No credit card. No setup. <span id="waitlist-count-footer">Developers</span> already building with Httrace.</p>
       <form class="waitlist-form" id="waitlist-form-bottom" onsubmit="handleWaitlist(event,'bottom')">
-        <div class="waitlist-row">
-          <input type="email" placeholder="you@company.com" required>
-          <button type="submit" class="btn-primary">Get my free API key →</button>
-        </div>
+        <input type="email" name="email" placeholder="you@company.com" required autocomplete="email">
+        <input type="password" name="password" placeholder="Choose a password (min. 8 characters)" required minlength="8" autocomplete="new-password">
+        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Get my free API key →</button>
         <div class="cf-turnstile" data-sitekey="0x4AAAAAAC_reSbsD9kMDpnv" data-theme="dark" data-size="flexible"></div>
       </form>
       <div class="waitlist-success" id="success-bottom">
-        ✓ Check your inbox — your API key is on its way.<br>
-        <span style="font-size:13px;color:var(--text-muted);margin-top:8px;display:inline-block;">
-          Once you have your key, <a href="login.html" style="color:var(--accent);text-decoration:none;">log in to your dashboard →</a>
-        </span>
+        ✓ Account created! Redirecting to your dashboard…
       </div>
       <p class="waitlist-note">Free plan: 10,000 requests/month · No credit card · Cancel anytime</p>
     </div>
@@ -1955,34 +1951,58 @@
   async function handleWaitlist(e, id) {
     e.preventDefault();
     const form = document.getElementById('waitlist-form-' + id);
-    const input = form.querySelector('input[type="email"]');
+    const emailInput = form.querySelector('input[type="email"]');
+    const passwordInput = form.querySelector('input[type="password"]');
     const btn = form.querySelector('button');
-    const email = input.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput ? passwordInput.value : '';
 
     // Get Turnstile token (falls back to empty string if widget not loaded)
     const tokenEl = form.querySelector('[name="cf-turnstile-response"]');
     const cf_turnstile_response = tokenEl ? tokenEl.value : '';
 
     btn.disabled = true;
-    btn.textContent = 'Sending key...';
+    btn.textContent = 'Creating account…';
 
     try {
       const res = await fetch(`${API_BASE}/v1/waitlist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, cf_turnstile_response }),
+        body: JSON.stringify({ email, password, cf_turnstile_response }),
       });
 
       if (res.ok || res.status === 201) {
+        // Auto-login immediately so user lands on the dashboard
+        if (password) {
+          try {
+            const loginRes = await fetch(`${API_BASE}/v1/auth/login`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password }),
+            });
+            if (loginRes.ok) {
+              const loginData = await loginRes.json();
+              localStorage.setItem('httrace_jwt', loginData.token);
+              localStorage.setItem('httrace_email', loginData.email);
+              form.style.display = 'none';
+              document.getElementById('success-' + id).classList.add('show');
+              setTimeout(() => { window.location.href = '/dashboard.html'; }, 1400);
+              return;
+            }
+          } catch {}
+        }
+        // Fallback (no password or login failed)
         form.style.display = 'none';
+        document.getElementById('success-' + id).innerHTML =
+          '✓ Account created! <a href="/dashboard.html" style="color:var(--accent);text-decoration:none;">Open your dashboard →</a>';
         document.getElementById('success-' + id).classList.add('show');
       } else if (res.status === 429) {
         btn.disabled = false;
         btn.textContent = 'Get my free API key →';
         if (window.turnstile) window.turnstile.reset();
-        input.setCustomValidity('Too many attempts — please try again in an hour.');
-        input.reportValidity();
-        setTimeout(() => input.setCustomValidity(''), 4000);
+        emailInput.setCustomValidity('Too many attempts — please try again in an hour.');
+        emailInput.reportValidity();
+        setTimeout(() => emailInput.setCustomValidity(''), 4000);
       } else if (res.status === 400) {
         const data = await res.json().catch(() => ({}));
         const msg = data.detail?.includes('CAPTCHA')
@@ -1991,20 +2011,19 @@
         btn.disabled = false;
         btn.textContent = 'Get my free API key →';
         if (window.turnstile) window.turnstile.reset();
-        input.setCustomValidity(msg);
-        input.reportValidity();
-        setTimeout(() => input.setCustomValidity(''), 4000);
+        emailInput.setCustomValidity(msg);
+        emailInput.reportValidity();
+        setTimeout(() => emailInput.setCustomValidity(''), 4000);
       } else {
         throw new Error('Server error');
       }
     } catch (err) {
       btn.disabled = false;
       btn.textContent = 'Get my free API key →';
-      // Reset Turnstile widget so user can retry
       if (window.turnstile) window.turnstile.reset();
-      input.setCustomValidity('Something went wrong — please try again.');
-      input.reportValidity();
-      setTimeout(() => input.setCustomValidity(''), 3000);
+      emailInput.setCustomValidity('Something went wrong — please try again.');
+      emailInput.reportValidity();
+      setTimeout(() => emailInput.setCustomValidity(''), 3000);
     }
   }
 </script>
