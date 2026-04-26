@@ -63,6 +63,10 @@ output: {output}
 """
     p.write_text(config, encoding="utf-8")
     console.print(f"[green]✓[/green]  Created {CONFIG_FILE}")
+    console.print(
+        f"[yellow]⚠[/yellow]  [bold]{CONFIG_FILE} contains your API key — never commit it to git.[/bold]\n"
+        f"   Add it to your .gitignore: [dim]echo 'httrace.config.yaml' >> .gitignore[/dim]"
+    )
     console.print(f"[dim]Next: add middleware to your app, then run [bold]httrace generate[/bold][/dim]")
 
 

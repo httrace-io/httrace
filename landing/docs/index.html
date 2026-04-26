@@ -221,7 +221,7 @@ app.<span class="fn">add_middleware</span>(
 <span class="ok">✓ 10 tests generated across 3 endpoints</span></pre>
 
     <div class="callout">
-      <strong>Get your API key:</strong> Sign up for the waitlist at <a href="../#waitlist">httrace.com</a>. Beta users receive their key by email within 24 hours.
+      <strong>Get your API key:</strong> <a href="../#waitlist">Create a free account at httrace.com</a> — your <code>ht_...</code> API key is delivered instantly. No credit card required.
     </div>
 
     <!-- INSTALLATION -->
@@ -246,6 +246,8 @@ app.<span class="fn">add_middleware</span>(
         <tr><td>exclude_paths</td><td>list[str]</td><td><code>[]</code></td><td>Path prefixes to skip (e.g. <code>["/health", "/metrics"]</code>).</td></tr>
         <tr><td>max_body_bytes</td><td>int</td><td><code>65536</code></td><td>Maximum request/response body size to capture (bytes). Larger bodies are truncated.</td></tr>
         <tr><td>pii_fields</td><td>list[str]</td><td>built-in list</td><td>Additional field names to redact on top of the built-in blocklist.</td></tr>
+        <tr><td>capture_outgoing</td><td>bool</td><td><code>False</code></td><td>When <code>True</code>, intercepts outgoing HTTP calls (httpx, requests) and SQL queries made during each request. Required for dependency mock generation. See <a href="#dependency-mocking">Dependency mocking</a>.</td></tr>
+        <tr><td>db_engines</td><td>list</td><td><code>None</code></td><td>SQLAlchemy engine instances to instrument for SQL capture. Only used when <code>capture_outgoing=True</code>. Example: <code>db_engines=[engine]</code>.</td></tr>
       </tbody>
     </table>
 

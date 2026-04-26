@@ -180,7 +180,8 @@ function sanitize(val) {
   if (typeof val === 'string') {
     return val
       .replace(/\b[\w.+\-]+@[\w.\-]+\.\w{2,}\b/g, '[EMAIL]')
-      .replace(/\b(?:\d[ -]?){13,16}\b/g, '[CARD]');
+      .replace(/\b(?:\d[ -]?){13,16}\b/g, '[CARD]')
+      .replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[JWT]');
   }
   if (Array.isArray(val)) return val.map(sanitize);
   if (val && typeof val === 'object') {

@@ -258,9 +258,8 @@
   /* ── PLAN UPGRADE ── */
   .upgrade-section { margin-bottom: 32px; }
   .plan-grid {
-    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
   }
-  @media (max-width: 1050px) { .plan-grid { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 700px)  { .plan-grid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 460px)  { .plan-grid { grid-template-columns: 1fr; } }
 
@@ -759,6 +758,17 @@ document.getElementById('logout-btn').addEventListener('click', logout);
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
+/** Escape user/API data before inserting into innerHTML to prevent XSS. */
+function escHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function fmt(n) { return n?.toLocaleString() ?? '—'; }
 
 function relativeTime(isoStr) {
@@ -821,12 +831,12 @@ function renderCaptures(captures) {
       </tr></thead>
       <tbody>${captures.map(c => `
         <tr>
-          <td><span class="method-badge method-${c.method}">${c.method}</span></td>
-          <td class="path-cell">${c.path}</td>
-          <td class="${statusClass(c.status_code)}">${c.status_code}</td>
+          <td><span class="method-badge method-${escHtml(c.method)}">${escHtml(c.method)}</span></td>
+          <td class="path-cell">${escHtml(c.path)}</td>
+          <td class="${statusClass(c.status_code)}">${escHtml(String(c.status_code))}</td>
           <td class="latency-cell">${c.latency_ms?.toFixed(1)}ms</td>
-          <td class="path-cell">${c.service}</td>
-          <td class="time-cell">${relativeTime(c.captured_at)}</td>
+          <td class="path-cell">${escHtml(c.service)}</td>
+          <td class="time-cell">${escHtml(relativeTime(c.captured_at))}</td>
         </tr>`).join('')}
       </tbody>
     </table>`;
@@ -846,10 +856,10 @@ function renderTests(tests) {
       </tr></thead>
       <tbody>${tests.map(t => `
         <tr>
-          <td class="path-cell">${t.test_name}</td>
-          <td class="path-cell">${t.service}</td>
-          <td style="color:var(--text-muted);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-mono);font-size:12px;">${t.code_preview?.split('\n')[0] || '—'}</td>
-          <td class="time-cell">${relativeTime(t.created_at)}</td>
+          <td class="path-cell">${escHtml(t.test_name)}</td>
+          <td class="path-cell">${escHtml(t.service)}</td>
+          <td style="color:var(--text-muted);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-mono);font-size:12px;">${escHtml(t.code_preview?.split('\n')[0] || '—')}</td>
+          <td class="time-cell">${escHtml(relativeTime(t.created_at))}</td>
         </tr>`).join('')}
       </tbody>
     </table>`;
@@ -870,7 +880,6 @@ const PLANS = [
       '10K captured requests / month',
       '1 service',
       'All 5 test formats',
-      'API drift detection',
       'Community support',
     ],
     available: true,
@@ -886,7 +895,8 @@ const PLANS = [
       '500K requests / month',
       '3 services',
       'All 5 test formats',
-      'Auto-generated fixtures',
+      'Auth fixtures auto-detected',
+      'Dependency mocking',
       'Email support',
     ],
     available: false,
@@ -1063,7 +1073,7 @@ function populateServiceSelector(captures, tests) {
 
   const sel = document.getElementById('service-select');
   sel.innerHTML = '<option value="">Select service…</option>' +
-    _services.map(s => `<option value="${s}">${s}</option>`).join('');
+    _services.map(s => `<option value="${escHtml(s)}">${escHtml(s)}</option>`).join('');
 
   // Auto-select if only one service
   if (_services.length === 1) {
@@ -1125,10 +1135,10 @@ function renderCoverage(data) {
       <tbody>${endpoints.map(ep => {
         const tested = ep.has_tests !== false;
         return `<tr>
-          <td><span class="method-badge method-${ep.method}">${ep.method}</span></td>
-          <td class="path-cell">${ep.path}</td>
-          <td>${ep.captures}</td>
-          <td class="path-cell">${(ep.statuses || []).sort().join(', ')}</td>
+          <td><span class="method-badge method-${escHtml(ep.method)}">${escHtml(ep.method)}</span></td>
+          <td class="path-cell">${escHtml(ep.path)}</td>
+          <td>${Number(ep.captures) || 0}</td>
+          <td class="path-cell">${escHtml((ep.statuses || []).sort().join(', '))}</td>
           <td><span class="cov-dot ${tested ? 'cov-dot-green' : 'cov-dot-gray'}"></span>${tested ? 'Generated' : 'Not yet'}</td>
         </tr>`;
       }).join('')}</tbody>
@@ -1156,16 +1166,16 @@ function renderChanges(data) {
       const badgeClass = ch.type === 'breaking' ? 'change-badge-breaking' :
                          ch.type === 'new_field' ? 'change-badge-new' : 'change-badge-schema';
       rows += `<tr>
-        <td class="path-cell">${ep.endpoint}</td>
-        <td><span class="change-badge ${badgeClass}">${ch.type.replace('_', ' ')}</span></td>
-        <td class="change-detail">${ch.detail || ''}</td>
+        <td class="path-cell">${escHtml(ep.endpoint)}</td>
+        <td><span class="change-badge ${badgeClass}">${escHtml(String(ch.type).replace('_', ' '))}</span></td>
+        <td class="change-detail">${escHtml(ch.detail || '')}</td>
       </tr>`;
     });
   });
 
   untested.forEach(ep => {
     rows += `<tr>
-      <td class="path-cell">${ep}</td>
+      <td class="path-cell">${escHtml(ep)}</td>
       <td><span class="change-badge change-badge-new">new endpoint</span></td>
       <td class="change-detail">No tests generated yet</td>
     </tr>`;
@@ -1206,12 +1216,32 @@ async function regenerateTests() {
   }
 }
 
-function downloadOpenApi() {
+async function downloadOpenApi() {
   const service = document.getElementById('service-select').value;
   if (!service || !_currentApiKey) return;
-  const url = `${API}/v1/openapi.yaml?service=${encodeURIComponent(service)}&x-api-key=${encodeURIComponent(_currentApiKey)}`;
-  // Open in new tab — browser will download or display the YAML
-  window.open(url, '_blank');
+  const btn = document.getElementById('openapi-btn');
+  btn.disabled = true;
+  btn.textContent = 'Downloading…';
+  try {
+    // Send API key as header, not URL param — prevents leaking into logs/history
+    const res = await fetch(
+      `${API}/v1/openapi.yaml?service=${encodeURIComponent(service)}`,
+      { headers: { 'X-Api-Key': _currentApiKey } }
+    );
+    if (!res.ok) throw new Error('Failed');
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `${service}-openapi.yaml`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.warn('OpenAPI download failed', e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Download OpenAPI';
+  }
 }
 
 // ── Alerts ────────────────────────────────────────────────────────────────
@@ -1252,18 +1282,18 @@ function renderAlerts(alerts) {
   };
 
   list.innerHTML = alerts.map(a => `
-    <div class="alert-item" data-alert-id="${a.id}">
+    <div class="alert-item" data-alert-id="${Number(a.id)}">
       <div class="alert-item-info">
-        <span class="alert-chip alert-chip-${a.channel}">${a.channel}</span>
-        <span class="alert-chip alert-chip-trigger">${triggerLabel[a.alert_on] || a.alert_on}</span>
-        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-dim)">${a.service}</span>
-        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">≥ ${a.threshold}%</span>
-        <span class="alert-dest" title="${a.destination}">${a.destination}</span>
-        ${a.last_fired_at ? `<span style="font-size:11px;color:var(--text-muted)">Last fired ${relativeTime(a.last_fired_at)}</span>` : ''}
+        <span class="alert-chip alert-chip-${escHtml(a.channel)}">${escHtml(a.channel)}</span>
+        <span class="alert-chip alert-chip-trigger">${escHtml(triggerLabel[a.alert_on] || a.alert_on)}</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-dim)">${escHtml(a.service)}</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">≥ ${Number(a.threshold) || 0}%</span>
+        <span class="alert-dest" title="${escHtml(a.destination)}">${escHtml(a.destination)}</span>
+        ${a.last_fired_at ? `<span style="font-size:11px;color:var(--text-muted)">Last fired ${escHtml(relativeTime(a.last_fired_at))}</span>` : ''}
       </div>
       <div class="alert-item-actions">
-        <button class="alert-test-btn" onclick="testAlert(${a.id})">Test</button>
-        <button class="alert-delete-btn" onclick="deleteAlert(${a.id})">Delete</button>
+        <button class="alert-test-btn" onclick="testAlert(${Number(a.id)})">Test</button>
+        <button class="alert-delete-btn" onclick="deleteAlert(${Number(a.id)})">Delete</button>
       </div>
     </div>`).join('');
 }
@@ -1386,43 +1416,48 @@ function renderOrgs(orgs) {
     return;
   }
 
-  el.innerHTML = orgs.map(org => `
+  el.innerHTML = orgs.map(org => {
+    const safeSlug = escHtml(org.slug);
+    const canManage = org.role === 'owner' || org.role === 'admin';
+    return `
     <div class="table-card" style="margin-bottom:12px">
       <div class="table-header">
         <div>
-          <span class="table-header-title">${org.name}</span>
-          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:10px">${org.slug}</span>
-          <span class="plan-badge" style="margin-left:8px">${org.role || ''}</span>
+          <span class="table-header-title">${escHtml(org.name)}</span>
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);margin-left:10px">${safeSlug}</span>
+          <span class="plan-badge" style="margin-left:8px">${escHtml(org.role || '')}</span>
         </div>
-        ${org.role === 'owner' || org.role === 'admin' ? `
-        <button class="section-action-btn" style="font-size:11px;padding:5px 10px" onclick="showInviteForm('${org.slug}')">Invite +</button>
+        ${canManage ? `
+        <button class="section-action-btn" style="font-size:11px;padding:5px 10px"
+          data-slug="${safeSlug}" onclick="showInviteForm(this.dataset.slug)">Invite +</button>
         ` : ''}
       </div>
-      <div id="invite-form-${org.slug}" style="display:none;padding:16px;border-bottom:1px solid var(--border)">
+      <div id="invite-form-${safeSlug}" style="display:none;padding:16px;border-bottom:1px solid var(--border)">
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
           <div class="alert-form-group">
             <label class="alert-form-label">Email</label>
-            <input class="alert-form-input" id="invite-email-${org.slug}" type="email" placeholder="colleague@example.com" style="min-width:200px">
+            <input class="alert-form-input" id="invite-email-${safeSlug}" type="email" placeholder="colleague@example.com" style="min-width:200px">
           </div>
           <div class="alert-form-group">
             <label class="alert-form-label">Role</label>
-            <select class="alert-form-select" id="invite-role-${org.slug}">
+            <select class="alert-form-select" id="invite-role-${safeSlug}">
               <option value="member">Member</option>
               <option value="admin">Admin</option>
             </select>
           </div>
-          <button class="section-action-btn" onclick="inviteMember('${org.slug}')">Send invite</button>
-          <button onclick="hideInviteForm('${org.slug}')" style="background:none;border:1px solid var(--border-2);color:var(--text-muted);font-size:12px;padding:8px 14px;border-radius:6px;cursor:pointer;">Cancel</button>
+          <button class="section-action-btn" data-slug="${safeSlug}" onclick="inviteMember(this.dataset.slug)">Send invite</button>
+          <button data-slug="${safeSlug}" onclick="hideInviteForm(this.dataset.slug)" style="background:none;border:1px solid var(--border-2);color:var(--text-muted);font-size:12px;padding:8px 14px;border-radius:6px;cursor:pointer;">Cancel</button>
         </div>
-        <div id="invite-msg-${org.slug}" style="font-family:var(--font-mono);font-size:12px;margin-top:8px;min-height:16px;"></div>
+        <div id="invite-msg-${safeSlug}" style="font-family:var(--font-mono);font-size:12px;margin-top:8px;min-height:16px;"></div>
       </div>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>Member</th><th>Role</th><th>Status</th>${(org.role === 'owner' || org.role === 'admin') ? '<th></th>' : ''}</tr></thead>
-          <tbody id="members-${org.slug}"><tr><td colspan="4" style="color:var(--text-muted);padding:12px 20px">Loading…</td></tr></tbody>
+          <thead><tr><th>Member</th><th>Role</th><th>Status</th>${canManage ? '<th></th>' : ''}</tr></thead>
+          <tbody id="members-${safeSlug}"><tr><td colspan="4" style="color:var(--text-muted);padding:12px 20px">Loading…</td></tr></tbody>
         </table>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // Load members for each org
   orgs.forEach(org => loadOrgMembers(org.slug, org.role));
@@ -1446,13 +1481,17 @@ async function loadOrgMembers(slug, myRole) {
     const tbody = document.getElementById(`members-${slug}`);
     if (!tbody) return;
     const canManage = myRole === 'owner' || myRole === 'admin';
-    tbody.innerHTML = (data.members || []).map(m => `
+    tbody.innerHTML = (data.members || []).map(m => {
+      const safeEmail = escHtml(m.email);
+      const safeSlug  = escHtml(slug);
+      return `
       <tr>
-        <td class="path-cell">${m.email}</td>
-        <td><span class="alert-chip ${m.role === 'owner' ? 'alert-chip-slack' : 'alert-chip-email'}">${m.role}</span></td>
+        <td class="path-cell">${safeEmail}</td>
+        <td><span class="alert-chip ${m.role === 'owner' ? 'alert-chip-slack' : 'alert-chip-email'}">${escHtml(m.role)}</span></td>
         <td>${m.accepted ? '<span style="color:var(--green);font-size:12px">✓ Active</span>' : '<span style="color:var(--text-muted);font-size:12px">Pending</span>'}</td>
-        ${canManage ? `<td>${m.role !== 'owner' ? `<button class="alert-delete-btn" onclick="removeMember('${slug}','${m.email}')">Remove</button>` : ''}</td>` : ''}
-      </tr>`).join('');
+        ${canManage ? `<td>${m.role !== 'owner' ? `<button class="alert-delete-btn" data-slug="${safeSlug}" data-email="${safeEmail}" onclick="removeMember(this.dataset.slug, this.dataset.email)">Remove</button>` : ''}</td>` : ''}
+      </tr>`;
+    }).join('');
   } catch (e) {}
 }
 
@@ -1552,7 +1591,7 @@ async function load() {
 
     // Stats
     document.getElementById('stat-plan').innerHTML =
-      `<span class="plan-badge">${me.plan_label || me.plan}</span>`;
+      `<span class="plan-badge">${escHtml(me.plan_label || me.plan)}</span>`;
     document.getElementById('stat-plan-limits').textContent =
       me.limits ? `${me.limits.requests_per_month} req/mo · ${me.limits.services} service${me.limits.services === '1' ? '' : 's'}` : '';
     document.getElementById('stat-requests').textContent = fmt(me.usage.requests_captured);
@@ -1566,8 +1605,8 @@ async function load() {
     // Plan limits row under usage bar
     if (me.limits) {
       document.getElementById('plan-limits-row').innerHTML = `
-        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${me.limits.requests_per_month} requests / month</span>
-        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${me.limits.services} service${me.limits.services === '1' ? '' : 's'}</span>
+        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${escHtml(String(me.limits.requests_per_month))} requests / month</span>
+        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${escHtml(String(me.limits.services))} service${me.limits.services === '1' ? '' : 's'}</span>
         <span class="plan-limit-item"><span class="plan-limit-dot"></span>pytest · Jest · Go · RSpec · Vitest</span>
         <span class="plan-limit-item"><span class="plan-limit-dot"></span>${me.plan === 'free' ? 'No credit card required' : 'Full access'}</span>
       `;

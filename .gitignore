@@ -39,6 +39,11 @@ coverage.xml
 # Logs
 *.log
 
+# CLI config (contains API key — never commit)
+httrace.config.yaml
+httrace.config.yml
+.httrace.yaml
+
 # Generated test output (belongs in customer repos, not here)
 tests/integration/
 
