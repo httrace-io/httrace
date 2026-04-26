@@ -181,15 +181,25 @@ nav {
 }
 .compare-wrap {
   border: 1px solid var(--border);
-  border-radius: 16px; overflow: hidden;
+  border-radius: 16px;
+  /* overflow:hidden breaks position:sticky — use clip instead.
+     overflow-y:clip clips without creating a scroll container,
+     so sticky thead still sticks relative to the viewport. */
   overflow-x: auto;
+  overflow-y: clip;
   -webkit-overflow-scrolling: touch;
 }
 .compare-table {
   width: 100%; min-width: 780px;
   border-collapse: collapse;
   background: var(--bg-2);
+  border-radius: 16px;
 }
+/* First/last cells in first/last rows — clip to rounded corners */
+.compare-table thead th:first-child { border-top-left-radius: 15px; }
+.compare-table thead th:last-child  { border-top-right-radius: 15px; }
+.compare-table tbody tr:last-child td:first-child { border-bottom-left-radius: 15px; }
+.compare-table tbody tr:last-child td:last-child  { border-bottom-right-radius: 15px; }
 
 /* Sticky header */
 .compare-table thead th {
