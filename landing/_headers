@@ -20,3 +20,8 @@
 
 /login.html
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.httrace.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
+
+/admin.html
+  # Founder-only dashboard — block search engine indexing
+  X-Robots-Tag: noindex, nofollow
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://avatars.githubusercontent.com; connect-src 'self' https://api.httrace.com https://api.github.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'

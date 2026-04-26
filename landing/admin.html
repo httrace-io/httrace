@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Httrace — Founder Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<!-- No analytics on admin page -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:     #080808;
+  --bg-2:   #0e0e0e;
+  --bg-3:   #141414;
+  --bg-4:   #1a1a1a;
+  --border: #1f1f1f;
+  --border-2: #2a2a2a;
+  --text:   #f0f0f0;
+  --dim:    #999;
+  --muted:  #555;
+  --accent: #3b82f6;
+  --green:  #22c55e;
+  --yellow: #f59e0b;
+  --red:    #ef4444;
+  --font-d: 'Syne', sans-serif;
+  --font-b: 'DM Sans', sans-serif;
+  --font-m: 'DM Mono', monospace;
+}
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-b); font-size: 14px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased; min-height: 100vh;
+}
+
+/* ── LOCK SCREEN ── */
+#lock {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999; flex-direction: column; gap: 24px;
+}
+.lock-logo { font-family: var(--font-d); font-size: 22px; font-weight: 800; color: var(--text); }
+.lock-logo span { color: var(--accent); }
+.lock-box {
+  background: var(--bg-2); border: 1px solid var(--border-2);
+  border-radius: 14px; padding: 32px; width: 340px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.lock-title { font-family: var(--font-d); font-size: 18px; font-weight: 700; }
+.lock-sub { font-size: 13px; color: var(--dim); margin-top: -8px; }
+.lock-input {
+  background: var(--bg-3); border: 1px solid var(--border-2);
+  border-radius: 8px; padding: 10px 14px; color: var(--text);
+  font-family: var(--font-m); font-size: 13px; width: 100%;
+  outline: none; transition: border-color 0.2s;
+}
+.lock-input:focus { border-color: var(--accent); }
+.lock-btn {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 8px; padding: 11px; font-size: 14px;
+  font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+}
+.lock-btn:hover { opacity: 0.88; }
+.lock-error { color: var(--red); font-size: 12px; font-family: var(--font-m); display: none; }
+
+/* ── MAIN LAYOUT ── */
+#app { display: none; min-height: 100vh; }
+
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 56px; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(8,8,8,0.95); backdrop-filter: blur(12px);
+}
+.nav-logo { font-family: var(--font-d); font-weight: 800; font-size: 16px; color: var(--text); }
+.nav-logo span { color: var(--accent); }
+.nav-badge {
+  background: var(--bg-3); border: 1px solid var(--border-2);
+  color: var(--dim); font-family: var(--font-m); font-size: 10px;
+  padding: 3px 8px; border-radius: 20px; letter-spacing: 0.08em;
+}
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-refresh {
+  background: transparent; border: 1px solid var(--border-2);
+  color: var(--dim); font-family: var(--font-m); font-size: 11px;
+  padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.nav-refresh:hover { color: var(--text); border-color: var(--border); }
+.last-updated { font-size: 11px; color: var(--muted); font-family: var(--font-m); }
+
+.page { max-width: 1300px; margin: 0 auto; padding: 32px 32px 80px; }
+
+/* ── SECTION HEADERS ── */
+.section-header {
+  font-family: var(--font-m); font-size: 10px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
+}
+
+/* ── STAT CARDS ── */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--bg-2); padding: 20px 18px;
+}
+.stat-label { font-size: 11px; color: var(--dim); font-family: var(--font-m); letter-spacing: 0.06em; margin-bottom: 8px; }
+.stat-value {
+  font-family: var(--font-d); font-size: 28px; font-weight: 800;
+  letter-spacing: -0.03em; line-height: 1;
+}
+.stat-value.green { color: var(--green); }
+.stat-value.yellow { color: var(--yellow); }
+.stat-sub { font-size: 11px; color: var(--muted); font-family: var(--font-m); margin-top: 6px; }
+
+/* ── TWO-COLUMN GRID ── */
+.two-col { display: grid; grid-template-columns: 1fr 340px; gap: 20px; margin-bottom: 32px; }
+
+/* ── CARD ── */
+.card {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-family: var(--font-d); font-size: 14px; font-weight: 700; }
+.card-count {
+  font-family: var(--font-m); font-size: 11px; color: var(--dim);
+  background: var(--bg-3); border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 20px;
+}
+
+/* ── USERS TABLE ── */
+.users-table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; padding: 10px 16px;
+  font-family: var(--font-m); font-size: 10px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-3); white-space: nowrap;
+}
+tbody td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(255,255,255,0.02); }
+.user-email { color: var(--text); font-weight: 400; }
+.user-email a { color: var(--text); text-decoration: none; }
+.user-email a:hover { color: var(--accent); }
+.plan-badge {
+  font-family: var(--font-m); font-size: 10px; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 20px;
+  display: inline-block;
+}
+.plan-free     { background: rgba(255,255,255,0.06); color: var(--dim); }
+.plan-indie    { background: rgba(59,130,246,0.12);  color: #60a5fa; }
+.plan-startup  { background: rgba(34,197,94,0.12);   color: var(--green); }
+.plan-business { background: rgba(245,158,11,0.12);  color: var(--yellow); }
+.plan-enterprise { background: rgba(239,68,68,0.12); color: var(--red); }
+.plan-starter  { background: rgba(34,197,94,0.12);   color: var(--green); }
+.plan-pro      { background: rgba(245,158,11,0.12);  color: var(--yellow); }
+.plan-growth   { background: rgba(239,68,68,0.12);   color: var(--red); }
+.captures-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.captures-bar { height: 4px; background: var(--bg-4); border-radius: 2px; flex: 1; min-width: 60px; }
+.captures-bar-fill { height: 4px; background: var(--accent); border-radius: 2px; transition: width 0.4s; }
+.num { font-family: var(--font-m); font-size: 12px; color: var(--dim); }
+.ts { font-family: var(--font-m); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.dot-active { width: 6px; height: 6px; background: var(--green); border-radius: 50%; display: inline-block; }
+.dot-inactive { width: 6px; height: 6px; background: var(--muted); border-radius: 50%; display: inline-block; }
+
+/* ── SIDEBAR CARDS ── */
+.plan-breakdown { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.plan-row { display: flex; align-items: center; gap: 10px; }
+.plan-row-name { font-family: var(--font-m); font-size: 11px; color: var(--dim); width: 70px; text-transform: uppercase; letter-spacing: 0.06em; }
+.plan-row-bar { flex: 1; height: 6px; background: var(--bg-4); border-radius: 3px; }
+.plan-row-fill { height: 6px; border-radius: 3px; transition: width 0.5s; }
+.plan-row-count { font-family: var(--font-m); font-size: 11px; color: var(--dim); width: 20px; text-align: right; }
+
+.recent-list { padding: 0; list-style: none; }
+.recent-item {
+  padding: 12px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+}
+.recent-item:last-child { border-bottom: none; }
+.recent-email { font-size: 13px; color: var(--text); word-break: break-all; }
+.recent-meta { font-family: var(--font-m); font-size: 10px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
+
+/* ── GITHUB ISSUES ── */
+.issues-list { list-style: none; }
+.issue-item {
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.issue-item:last-child { border-bottom: none; }
+.issue-top { display: flex; align-items: center; gap: 10px; }
+.issue-number { font-family: var(--font-m); font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.issue-title a { font-size: 13px; color: var(--text); text-decoration: none; }
+.issue-title a:hover { color: var(--accent); }
+.issue-label {
+  font-family: var(--font-m); font-size: 9px; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 2px 6px; border-radius: 20px;
+  display: inline-block; flex-shrink: 0;
+}
+.issue-meta { font-family: var(--font-m); font-size: 11px; color: var(--muted); }
+.empty-state { padding: 32px 20px; text-align: center; color: var(--muted); font-size: 13px; }
+
+/* ── LOADING ── */
+.skeleton { background: linear-gradient(90deg, var(--bg-3) 25%, var(--bg-4) 50%, var(--bg-3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+@media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 900px)  { .two-col { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); } .page { padding: 16px 16px 60px; } }
+</style>
+</head>
+<body>
+
+<!-- ── LOCK SCREEN ── -->
+<div id="lock">
+  <div class="lock-logo">htt<span>race</span></div>
+  <div class="lock-box">
+    <div class="lock-title">Founder Dashboard</div>
+    <div class="lock-sub">Enter your admin key to continue.</div>
+    <input type="password" class="lock-input" id="lock-input" placeholder="Admin key…" autocomplete="off">
+    <div class="lock-error" id="lock-error">Incorrect key.</div>
+    <button class="lock-btn" id="lock-btn">Unlock →</button>
+  </div>
+</div>
+
+<!-- ── MAIN APP ── -->
+<div id="app">
+  <nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="nav-logo">htt<span>race</span></div>
+      <div class="nav-badge">FOUNDER</div>
+    </div>
+    <div class="nav-right">
+      <div class="last-updated" id="last-updated">—</div>
+      <button class="nav-refresh" onclick="loadAll()">↻ Refresh</button>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <!-- STATS ROW -->
+    <div class="section-header">Overview</div>
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total users</div><div class="stat-value" id="s-users">—</div></div>
+      <div class="stat-card"><div class="stat-label">Today</div><div class="stat-value green" id="s-today">—</div><div class="stat-sub" id="s-week-sub">— this week</div></div>
+      <div class="stat-card"><div class="stat-label">Active (7d)</div><div class="stat-value" id="s-active">—</div><div class="stat-sub">unique senders</div></div>
+      <div class="stat-card"><div class="stat-label">Total captures</div><div class="stat-value" id="s-captures">—</div></div>
+      <div class="stat-card"><div class="stat-label">This month</div><div class="stat-value" id="s-month">—</div><div class="stat-sub" id="s-today-sub">— today</div></div>
+      <div class="stat-card"><div class="stat-label">MRR</div><div class="stat-value yellow" id="s-mrr">—</div></div>
+      <div class="stat-card"><div class="stat-label">Paid users</div><div class="stat-value" id="s-paid">—</div><div class="stat-sub">non-free plans</div></div>
+    </div>
+
+    <!-- USERS + SIDEBAR -->
+    <div class="two-col">
+
+      <!-- USERS TABLE -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Users</div>
+          <div class="card-count" id="user-count">—</div>
+        </div>
+        <div class="users-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Email</th>
+                <th>Plan</th>
+                <th>Captures (month)</th>
+                <th>Total</th>
+                <th>Last active</th>
+                <th>Signed up</th>
+                <th>PW</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody">
+              <tr><td colspan="7" class="empty-state">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div style="display:flex;flex-direction:column;gap:20px">
+
+        <!-- PLAN BREAKDOWN -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">By plan</div></div>
+          <div class="plan-breakdown" id="plan-breakdown">
+            <div class="empty-state">Loading…</div>
+          </div>
+        </div>
+
+        <!-- RECENT SIGNUPS -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recent signups</div></div>
+          <ul class="recent-list" id="recent-list">
+            <li class="empty-state">Loading…</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- GITHUB ISSUES -->
+    <div class="section-header">GitHub Issues</div>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Open issues — httrace-io/httrace</div>
+        <a href="https://github.com/httrace-io/httrace/issues" target="_blank" style="font-family:var(--font-m);font-size:11px;color:var(--accent);text-decoration:none">View on GitHub →</a>
+      </div>
+      <ul class="issues-list" id="issues-list">
+        <li class="empty-state">Loading…</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const API       = 'https://api.httrace.com';
+const GH_REPO   = 'httrace-io/httrace';
+const SESSION_KEY = 'httrace_admin_key';
+
+// ── Auth ─────────────────────────────────────────────────────────────────
+
+let _adminKey = sessionStorage.getItem(SESSION_KEY) || '';
+
+function tryUnlock(key) {
+  // Validate by calling the admin API
+  fetch(`${API}/v1/admin/stats`, { headers: { 'x-admin-key': key } })
+    .then(r => {
+      if (r.ok) {
+        sessionStorage.setItem(SESSION_KEY, key);
+        _adminKey = key;
+        document.getElementById('lock').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        loadAll();
+      } else {
+        document.getElementById('lock-error').style.display = 'block';
+      }
+    })
+    .catch(() => {
+      document.getElementById('lock-error').textContent = 'Cannot reach API.';
+      document.getElementById('lock-error').style.display = 'block';
+    });
+}
+
+document.getElementById('lock-btn').addEventListener('click', () => {
+  const key = document.getElementById('lock-input').value.trim();
+  if (!key) return;
+  tryUnlock(key);
+});
+document.getElementById('lock-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('lock-btn').click();
+});
+
+// If session has a key, try auto-unlock
+if (_adminKey) tryUnlock(_adminKey);
+
+// ── Data loading ──────────────────────────────────────────────────────────
+
+function loadAll() {
+  loadStats();
+  loadUsers();
+  loadIssues();
+  document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+
+function fmt(n) {
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace('.0','') + 'M';
+  if (n >= 1_000)     return (n / 1_000).toFixed(1).replace('.0','') + 'K';
+  return String(n);
+}
+
+function loadStats() {
+  fetch(`${API}/v1/admin/stats`, { headers: { 'x-admin-key': _adminKey } })
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('s-users').textContent    = fmt(d.total_users);
+      document.getElementById('s-today').textContent    = fmt(d.users_today);
+      document.getElementById('s-week-sub').textContent = fmt(d.users_this_week) + ' this week';
+      document.getElementById('s-active').textContent   = fmt(d.active_users_7d);
+      document.getElementById('s-captures').textContent = fmt(d.total_captures);
+      document.getElementById('s-month').textContent    = fmt(d.captures_this_month);
+      document.getElementById('s-today-sub').textContent= fmt(d.captures_today) + ' today';
+      document.getElementById('s-mrr').textContent      = '€' + d.mrr_eur;
+      const paid = Object.entries(d.plan_breakdown).filter(([p]) => p !== 'free').reduce((a,[,v]) => a+v, 0);
+      document.getElementById('s-paid').textContent     = fmt(paid);
+
+      // Plan breakdown sidebar
+      const plans = ['free','indie','startup','business','enterprise','starter','pro','growth'];
+      const total = d.total_users || 1;
+      const colors = { free:'#555', indie:'#60a5fa', startup:'#22c55e', business:'#f59e0b', enterprise:'#ef4444', starter:'#22c55e', pro:'#f59e0b', growth:'#ef4444' };
+      const bd = plans.filter(p => d.plan_breakdown[p]).map(p => {
+        const count = d.plan_breakdown[p] || 0;
+        const pct = Math.max(4, Math.round((count / total) * 100));
+        return `<div class="plan-row">
+          <div class="plan-row-name">${p}</div>
+          <div class="plan-row-bar"><div class="plan-row-fill" style="width:${pct}%;background:${colors[p]||'#666'}"></div></div>
+          <div class="plan-row-count">${count}</div>
+        </div>`;
+      }).join('');
+      document.getElementById('plan-breakdown').innerHTML = bd || '<div class="empty-state">No data</div>';
+
+      // Recent signups
+      const recent = (d.recent_signups || []).map(u => `
+        <li class="recent-item">
+          <div>
+            <div class="recent-email">${escHtml(u.email)}</div>
+            <div class="recent-meta">${escHtml(u.plan)} · ${relTime(u.created_at)}</div>
+          </div>
+          <span class="plan-badge plan-${escHtml(u.plan)}">${escHtml(u.plan)}</span>
+        </li>`).join('');
+      document.getElementById('recent-list').innerHTML = recent || '<li class="empty-state">No recent signups</li>';
+    });
+}
+
+// ── Users ─────────────────────────────────────────────────────────────────
+
+function loadUsers() {
+  fetch(`${API}/v1/admin/users`, { headers: { 'x-admin-key': _adminKey } })
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('user-count').textContent = d.total + ' total';
+      const maxCaptures = Math.max(1, ...d.users.map(u => u.total_captures));
+      const rows = d.users.map(u => {
+        const pct = Math.round((u.captures_this_month / maxCaptures) * 100);
+        const isRecent = u.last_active && (Date.now() - new Date(u.last_active).getTime()) < 7 * 86400_000;
+        return `<tr>
+          <td class="user-email">
+            ${u.has_password ? '<span class="dot-active" title="Has password"></span> ' : '<span class="dot-inactive" title="No password set"></span> '}
+            <a href="mailto:${escHtml(u.email)}">${escHtml(u.email)}</a>
+          </td>
+          <td><span class="plan-badge plan-${escHtml(u.plan)}">${escHtml(u.plan)}</span></td>
+          <td>
+            <div class="captures-bar-wrap">
+              <div class="captures-bar"><div class="captures-bar-fill" style="width:${pct}%"></div></div>
+              <span class="num">${fmt(u.captures_this_month)}</span>
+            </div>
+          </td>
+          <td><span class="num">${fmt(u.total_captures)}</span></td>
+          <td><span class="ts">${u.last_active ? relTime(u.last_active) : '—'}</span></td>
+          <td><span class="ts">${relTime(u.created_at)}</span></td>
+          <td><span style="color:${u.has_password ? 'var(--green)' : 'var(--muted)'};font-size:12px">${u.has_password ? '✓' : '—'}</span></td>
+        </tr>`;
+      }).join('');
+      document.getElementById('users-tbody').innerHTML = rows || '<tr><td colspan="7" class="empty-state">No users yet</td></tr>';
+    });
+}
+
+// ── GitHub Issues ─────────────────────────────────────────────────────────
+
+const LABEL_COLORS = {
+  bug: '#ef4444', enhancement: '#3b82f6', documentation: '#f59e0b',
+  question: '#a78bfa', 'good first issue': '#22c55e', help: '#f59e0b',
+};
+
+function labelStyle(name) {
+  const lc = name.toLowerCase();
+  for (const [k, c] of Object.entries(LABEL_COLORS)) {
+    if (lc.includes(k)) {
+      return `background:${c}22;color:${c};border:1px solid ${c}44`;
+    }
+  }
+  return 'background:var(--bg-4);color:var(--dim);border:1px solid var(--border-2)';
+}
+
+function loadIssues() {
+  fetch(`https://api.github.com/repos/${GH_REPO}/issues?state=open&per_page=20`)
+    .then(r => r.json())
+    .then(issues => {
+      if (!Array.isArray(issues) || issues.length === 0) {
+        document.getElementById('issues-list').innerHTML = '<li class="empty-state">No open issues 🎉</li>';
+        return;
+      }
+      const items = issues.map(issue => {
+        const labels = (issue.labels || []).map(l =>
+          `<span class="issue-label" style="${labelStyle(l.name)}">${escHtml(l.name)}</span>`
+        ).join(' ');
+        return `<li class="issue-item">
+          <div class="issue-top">
+            <span class="issue-number">#${issue.number}</span>
+            <span class="issue-title"><a href="${escHtml(issue.html_url)}" target="_blank">${escHtml(issue.title)}</a></span>
+            ${labels}
+          </div>
+          <div class="issue-meta">
+            opened ${relTime(issue.created_at)} by ${escHtml(issue.user?.login || '?')}
+            ${issue.comments > 0 ? ` · ${issue.comments} comment${issue.comments > 1 ? 's' : ''}` : ''}
+          </div>
+        </li>`;
+      }).join('');
+      document.getElementById('issues-list').innerHTML = items;
+    })
+    .catch(() => {
+      document.getElementById('issues-list').innerHTML = '<li class="empty-state">Could not load issues (rate limit?)</li>';
+    });
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function escHtml(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function relTime(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60_000);
+  const h = Math.floor(diff / 3_600_000);
+  const d = Math.floor(diff / 86_400_000);
+  if (m < 2)   return 'just now';
+  if (m < 60)  return m + 'm ago';
+  if (h < 24)  return h + 'h ago';
+  if (d < 30)  return d + 'd ago';
+  return new Date(iso).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
+}
+
+// Auto-refresh every 60 seconds
+setInterval(() => { if (_adminKey) loadAll(); }, 60_000);
+</script>
+</body>
+</html>
