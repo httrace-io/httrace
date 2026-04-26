@@ -530,7 +530,7 @@
   #pricing { background: var(--bg-2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
   .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1px;
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -693,6 +693,15 @@
   .cf-turnstile {
     display: flex;
     justify-content: center;
+    margin-top: 14px;
+  }
+  .form-error {
+    color: var(--red);
+    font-size: 13px;
+    font-family: var(--font-mono);
+    margin-top: 10px;
+    min-height: 18px;
+    text-align: center;
   }
   .waitlist-form input {
     flex: 1;
@@ -1974,8 +1983,9 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           </button>
         </div>
-        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">Get my free API key →</button>
         <div class="cf-turnstile" data-sitekey="0x4AAAAAAC_reSbsD9kMDpnv" data-theme="dark" data-size="flexible"></div>
+        <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:14px;">Get my free API key →</button>
+        <p class="form-error" id="form-error-bottom"></p>
       </form>
       <div class="waitlist-success" id="success-bottom">
         ✓ Account created! Redirecting to your dashboard…
@@ -2139,6 +2149,13 @@
       : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
   }
 
+  function showFormError(id, msg, durationMs) {
+    const el = document.getElementById('form-error-' + id);
+    if (!el) return;
+    el.textContent = msg;
+    if (durationMs) setTimeout(() => { el.textContent = ''; }, durationMs);
+  }
+
   async function handleWaitlist(e, id) {
     e.preventDefault();
     const form = document.getElementById('waitlist-form-' + id);
@@ -2150,6 +2167,9 @@
     const password = passwordInput ? passwordInput.value : '';
     const confirm = confirmInput ? confirmInput.value : '';
 
+    // Clear any existing form error
+    showFormError(id, '');
+
     // Validate passwords match
     if (confirm && password !== confirm) {
       confirmInput.setCustomValidity('Passwords do not match.');
@@ -2158,9 +2178,10 @@
       return;
     }
 
-    // Get Turnstile token (falls back to empty string if widget not loaded)
+    // Get Turnstile token — prefer the JS API, fall back to hidden input
     const tokenEl = form.querySelector('[name="cf-turnstile-response"]');
-    const cf_turnstile_response = tokenEl ? tokenEl.value : '';
+    const cf_turnstile_response = (window.turnstile?.getResponse && window.turnstile.getResponse()) ||
+      (tokenEl ? tokenEl.value : '') || '';
 
     btn.disabled = true;
     btn.textContent = 'Creating account…';
@@ -2201,20 +2222,22 @@
         btn.disabled = false;
         btn.textContent = 'Get my free API key →';
         if (window.turnstile) window.turnstile.reset();
-        emailInput.setCustomValidity('Too many attempts — please try again in an hour.');
-        emailInput.reportValidity();
-        setTimeout(() => emailInput.setCustomValidity(''), 4000);
+        showFormError(id, 'Too many attempts — please try again in an hour.', 6000);
       } else if (res.status === 400) {
         const data = await res.json().catch(() => ({}));
-        const msg = data.detail?.includes('CAPTCHA')
-          ? 'CAPTCHA check failed — please try again.'
-          : 'Something went wrong — please try again.';
         btn.disabled = false;
         btn.textContent = 'Get my free API key →';
         if (window.turnstile) window.turnstile.reset();
-        emailInput.setCustomValidity(msg);
-        emailInput.reportValidity();
-        setTimeout(() => emailInput.setCustomValidity(''), 4000);
+        if (data.detail?.includes('CAPTCHA')) {
+          showFormError(id, 'Security check failed — please reload the page and try again.', 6000);
+        } else if (data.detail?.toLowerCase().includes('email')) {
+          // Email-specific error (e.g. already registered) → show on the field
+          emailInput.setCustomValidity(data.detail);
+          emailInput.reportValidity();
+          setTimeout(() => emailInput.setCustomValidity(''), 5000);
+        } else {
+          showFormError(id, data.detail || 'Something went wrong — please try again.', 5000);
+        }
       } else {
         throw new Error('Server error');
       }
@@ -2222,9 +2245,7 @@
       btn.disabled = false;
       btn.textContent = 'Get my free API key →';
       if (window.turnstile) window.turnstile.reset();
-      emailInput.setCustomValidity('Something went wrong — please try again.');
-      emailInput.reportValidity();
-      setTimeout(() => emailInput.setCustomValidity(''), 3000);
+      showFormError(id, 'Something went wrong — please try again.', 4000);
     }
   }
 </script>
