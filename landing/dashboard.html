@@ -85,7 +85,13 @@
   .api-key-value {
     font-family: var(--font-mono); font-size: 14px; color: var(--accent);
     flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.02em; min-width: 0;
+  }
+  .api-key-value.revealed {
+    white-space: normal; word-break: break-all; text-overflow: clip;
+  }
+  .api-key-buttons {
+    display: flex; gap: 8px; flex-shrink: 0;
   }
   .copy-btn, .reveal-btn {
     background: var(--bg-4); border: 1px solid var(--border-2);
@@ -95,6 +101,24 @@
   }
   .copy-btn:hover, .reveal-btn:hover { color: var(--text); border-color: var(--border); }
   .copy-btn.copied { color: var(--green); border-color: rgba(34,197,94,0.3); }
+  /* Mobile: stack key above buttons so the full key is readable */
+  @media (max-width: 600px) {
+    .api-key-row {
+      flex-direction: column; align-items: stretch; gap: 12px;
+    }
+    .api-key-value {
+      font-size: 13px; min-width: 0; overflow-x: auto;
+    }
+    .api-key-value.revealed {
+      white-space: normal; word-break: break-all;
+    }
+    .api-key-buttons {
+      display: flex; gap: 8px;
+    }
+    .copy-btn, .reveal-btn {
+      flex: 1; text-align: center; padding: 10px 12px; font-size: 13px;
+    }
+  }
 
   /* ── USAGE BAR ── */
   .usage-section { margin-bottom: 32px; }
@@ -501,8 +525,10 @@
       <div class="card-title">Your API Key</div>
       <div class="api-key-row">
         <div class="api-key-value" id="api-key-display">loading…</div>
-        <button class="reveal-btn" id="reveal-btn">Reveal</button>
-        <button class="copy-btn" id="copy-btn">Copy</button>
+        <div class="api-key-buttons">
+          <button class="reveal-btn" id="reveal-btn">Reveal</button>
+          <button class="copy-btn" id="copy-btn">Copy</button>
+        </div>
       </div>
     </div>
 
@@ -762,10 +788,12 @@ function maskKey(key) {
 }
 
 const revealBtn = document.getElementById('reveal-btn');
+const apiKeyDisplay = document.getElementById('api-key-display');
+
 revealBtn.addEventListener('click', () => {
   _keyRevealed = !_keyRevealed;
-  document.getElementById('api-key-display').textContent =
-    _keyRevealed ? _realApiKey : maskKey(_realApiKey);
+  apiKeyDisplay.textContent = _keyRevealed ? _realApiKey : maskKey(_realApiKey);
+  apiKeyDisplay.classList.toggle('revealed', _keyRevealed);
   revealBtn.textContent = _keyRevealed ? 'Hide' : 'Reveal';
 });
 
