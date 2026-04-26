@@ -2,8 +2,96 @@
 
 const https = require('https');
 const http = require('http');
+const { URL } = require('url');
+const { AsyncLocalStorage } = require('node:async_hooks');
 
 const DEFAULT_ENDPOINT = 'https://api.httrace.com/v1/captures';
+
+// ── Outgoing call capture ──────────────────────────────────────────────────
+
+const _outgoingStore = new AsyncLocalStorage();
+
+const _SENSITIVE_URL_PARAM_RE = /api[-_]?key|apikey|token|secret|auth|password|passwd|credential|access[-_]?token/i;
+
+function _sanitizeOutgoingUrl(rawUrl) {
+  try {
+    const parsed = new URL(rawUrl);
+    for (const key of parsed.searchParams.keys()) {
+      if (_SENSITIVE_URL_PARAM_RE.test(key)) {
+        parsed.searchParams.set(key, '<REDACTED>');
+      }
+    }
+    return parsed.toString();
+  } catch {
+    return rawUrl;
+  }
+}
+
+let _httpPatched = false;
+
+function _patchHttp() {
+  if (_httpPatched) return;
+  _httpPatched = true;
+
+  const _patchModule = (mod, scheme) => {
+    const origRequest = mod.request.bind(mod);
+
+    mod.request = function patchedRequest(urlOrOptions, callbackOrOptions, callback) {
+      const store = _outgoingStore.getStore();
+      if (!store) return origRequest(urlOrOptions, callbackOrOptions, callback);
+
+      const t0 = Date.now();
+      let method = 'GET';
+      let rawUrl = '';
+
+      try {
+        if (typeof urlOrOptions === 'string') {
+          rawUrl = urlOrOptions;
+          method = (callbackOrOptions && callbackOrOptions.method) ? callbackOrOptions.method.toUpperCase() : 'GET';
+        } else if (urlOrOptions && typeof urlOrOptions === 'object') {
+          const opts = urlOrOptions;
+          const host = opts.hostname || opts.host || 'localhost';
+          const port = opts.port ? `:${opts.port}` : '';
+          const path = opts.path || '/';
+          rawUrl = `${scheme}://${host}${port}${path}`;
+          method = (opts.method || 'GET').toUpperCase();
+        }
+      } catch {}
+
+      const req = origRequest(urlOrOptions, callbackOrOptions, callback);
+
+      req.on('response', (res) => {
+        const status = res.statusCode || 0;
+        const ct = (res.headers['content-type'] || '').toLowerCase();
+        const chunks = [];
+
+        res.on('data', (chunk) => chunks.push(chunk));
+        res.on('end', () => {
+          try {
+            const latency = Date.now() - t0;
+            let body = null;
+            if (ct.includes('application/json')) {
+              try { body = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch {}
+            }
+            store.push({
+              type: 'http',
+              method,
+              url: _sanitizeOutgoingUrl(rawUrl),
+              response_status: status,
+              response_body: body,
+              latency_ms: latency,
+            });
+          } catch {}
+        });
+      });
+
+      return req;
+    };
+  };
+
+  _patchModule(http, 'http');
+  _patchModule(https, 'https');
+}
 
 const SENSITIVE_HEADERS = new Set([
   'authorization', 'cookie', 'set-cookie',
@@ -130,12 +218,15 @@ function httrace(options = {}) {
     sampleRate = 0.1,
     excludePaths = ['/health', '/metrics', '/favicon.ico'],
     endpoint,
+    captureOutgoing = false,
   } = options;
 
   if (!apiKey) throw new Error('[httrace] apiKey is required');
 
   const _client = new HttraceClient(apiKey, endpoint || DEFAULT_ENDPOINT);
   const _exclude = new Set(excludePaths);
+
+  if (captureOutgoing) _patchHttp();
 
   return function httraceMiddleware(req, res, next) {
     const path = req.path || (req.url || '').split('?')[0];
@@ -170,6 +261,8 @@ function httrace(options = {}) {
             reqBody = sanitize(parseBody(null, reqCT));
           }
 
+          const outgoingCalls = captureOutgoing ? (_outgoingStore.getStore() || []) : [];
+
           const interaction = {
             service,
             session_id: req.headers['x-session-id'] || req.headers['x-request-id'] || null,
@@ -187,6 +280,7 @@ function httrace(options = {}) {
               body: sanitize(parseBody(respBuf, String(respCT))),
               latency_ms: latency,
             },
+            outgoing_calls: outgoingCalls,
           };
 
           _client.enqueue(interaction);
@@ -198,7 +292,13 @@ function httrace(options = {}) {
       return origEnd(chunk, ...args);
     };
 
-    next();
+    // Run next() inside the AsyncLocalStorage context so all outgoing calls
+    // made during this request are captured in the per-request store.
+    if (captureOutgoing) {
+      _outgoingStore.run([], () => next());
+    } else {
+      next();
+    }
   };
 }
 

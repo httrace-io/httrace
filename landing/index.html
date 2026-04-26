@@ -1246,21 +1246,26 @@
 <span class="kw">import</span> pytest
 
 <span class="kw">@pytest.fixture</span>
+<span class="kw">def</span> <span class="fn">mock_outgoing_http</span>(respx_mock):
+    respx_mock.post(<span class="st">"https://api.stripe.com/v1/charges"</span>).mock(
+        return_value=httpx.Response(<span class="nu">200</span>, json={<span class="st">"id"</span>: <span class="st">"ch_9f2a1c"</span>, <span class="st">"status"</span>: <span class="st">"succeeded"</span>}))
+    <span class="kw">yield</span> respx_mock
+
+<span class="kw">@pytest.fixture</span>
 <span class="kw">def</span> <span class="fn">payload_post_checkout_201</span>():
     <span class="kw">return</span> {<span class="st">"cart_id"</span>: <span class="st">"cart_9f2a1c"</span>,
-            <span class="st">"payment_method"</span>: <span class="st">"card"</span>,
-            <span class="st">"coupon_code"</span>: <span class="st">"SAVE10"</span>}
+            <span class="st">"payment_method"</span>: <span class="st">"card"</span>}
 
-<span class="kw">def</span> <span class="fn">test_post_checkout_201</span>(client, auth_headers, payload_post_checkout_201):
+<span class="kw">def</span> <span class="fn">test_post_checkout_201</span>(client, auth_headers, mock_outgoing_http, payload_post_checkout_201):
     r = client.post(<span class="st">"/checkout"</span>,
         json=payload_post_checkout_201, headers=auth_headers)
     <span class="kw">assert</span> r.status_code == <span class="nu">201</span>
     <span class="kw">assert</span> <span class="st">"order_id"</span> <span class="kw">in</span> r.json()
 
-<span class="kw">def</span> <span class="fn">test_post_checkout_422</span>(client, auth_headers):
+<span class="kw">def</span> <span class="fn">test_post_checkout_422</span>(client, auth_headers, mock_outgoing_http):
     r = client.post(<span class="st">"/checkout"</span>, json={}, headers=auth_headers)
     <span class="kw">assert</span> r.status_code == <span class="nu">422</span>
-<span class="gn">✓ 14 tests · auth_headers fixture auto-generated</span>
+<span class="gn">✓ 14 tests · auth_headers + mock_outgoing_http auto-generated</span>
           </div>
         </div>
       </div>
@@ -1622,6 +1627,20 @@
             <td><span class="cross">✕</span></td>
           </tr>
           <tr>
+            <td>Dependency mocks auto-generated</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
+            <td>Tests run without infrastructure</td>
+            <td class="col-httrace"><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+            <td><span class="cross">✕</span></td>
+            <td><span class="cross">✕</span></td>
+          </tr>
+          <tr>
             <td>GitHub Actions integration</td>
             <td class="col-httrace"><span class="check">✓</span></td>
             <td><span class="cross">✕</span></td>
@@ -1723,6 +1742,7 @@
           <li>3 services</li>
           <li>All 5 test formats</li>
           <li>Auth fixtures auto-detected</li>
+          <li>Dependency mocking</li>
           <li>Email support</li>
         </ul>
       </div>
@@ -1737,6 +1757,7 @@
           <li>2M requests / month</li>
           <li>5 services</li>
           <li>All 5 test formats</li>
+          <li>Dependency mocking</li>
           <li>GitHub Actions integration</li>
           <li>API drift detection</li>
           <li>Email support</li>
@@ -1753,6 +1774,7 @@
           <li>5M requests / month</li>
           <li>10 services</li>
           <li>All 5 test formats</li>
+          <li>Dependency mocking</li>
           <li>Slack &amp; email alerts</li>
           <li>Replay testing</li>
           <li>OpenAPI export</li>

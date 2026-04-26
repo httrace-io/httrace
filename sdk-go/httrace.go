@@ -18,10 +18,13 @@ package httrace
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"math/rand"
 	"net/http"
+	"net/url"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -45,6 +48,101 @@ var binaryContentTypes = []string{
 
 var sensitiveKeys = []string{"password", "secret", "token", "ssn", "credit_card", "card_number", "cvv"}
 
+// outgoingCallKey is the context key for per-request outgoing call capture.
+type outgoingCallKey struct{}
+
+// OutgoingCall represents a single outgoing dependency call captured during a request.
+type OutgoingCall struct {
+	Type           string      `json:"type"`
+	Method         string      `json:"method,omitempty"`
+	URL            string      `json:"url,omitempty"`
+	RequestBody    interface{} `json:"request_body,omitempty"`
+	ResponseStatus int         `json:"response_status,omitempty"`
+	ResponseBody   interface{} `json:"response_body,omitempty"`
+	LatencyMs      float64     `json:"latency_ms"`
+}
+
+var sensitiveURLParamRe = regexp.MustCompile(`(?i)api[-_]?key|apikey|token|secret|auth|password|passwd|credential|access[-_]?token`)
+
+func sanitizeOutgoingURL(rawURL string) string {
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	q := parsed.Query()
+	for k := range q {
+		if sensitiveURLParamRe.MatchString(k) {
+			q.Set(k, "<REDACTED>")
+		}
+	}
+	parsed.RawQuery = q.Encode()
+	return parsed.String()
+}
+
+// RecordingTransport is an http.RoundTripper that records outgoing HTTP calls
+// into the per-request context when CaptureOutgoing is enabled.
+type RecordingTransport struct {
+	Base http.RoundTripper
+}
+
+func (t *RecordingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	calls, _ := req.Context().Value(outgoingCallKey{}).(*[]OutgoingCall)
+
+	base := t.Base
+	if base == nil {
+		base = http.DefaultTransport
+	}
+
+	if calls == nil {
+		return base.RoundTrip(req)
+	}
+
+	t0 := time.Now()
+	resp, err := base.RoundTrip(req)
+	latency := time.Since(t0).Seconds() * 1000
+
+	if err == nil {
+		var body interface{}
+		ct := resp.Header.Get("Content-Type")
+		if strings.Contains(ct, "application/json") {
+			raw, readErr := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if readErr == nil {
+				_ = json.Unmarshal(raw, &body)
+				resp.Body = io.NopCloser(bytes.NewReader(raw))
+			}
+		}
+		*calls = append(*calls, OutgoingCall{
+			Type:           "http",
+			Method:         req.Method,
+			URL:            sanitizeOutgoingURL(req.URL.String()),
+			ResponseStatus: resp.StatusCode,
+			ResponseBody:   body,
+			LatencyMs:      latency,
+		})
+	}
+
+	return resp, err
+}
+
+// ClientFromContext returns an *http.Client whose transport records outgoing calls
+// into the per-request context. Use this client for any outgoing HTTP calls
+// you want to capture when CaptureOutgoing is enabled in the middleware.
+//
+//	client := httrace.ClientFromContext(r.Context())
+//	resp, err := client.Get("https://api.stripe.com/...")
+func ClientFromContext(ctx context.Context) *http.Client {
+	return &http.Client{
+		Transport: &RecordingTransport{Base: http.DefaultTransport},
+	}
+}
+
+// contextWithOutgoingCapture returns a context that records outgoing calls.
+func contextWithOutgoingCapture(ctx context.Context) (context.Context, *[]OutgoingCall) {
+	calls := make([]OutgoingCall, 0)
+	return context.WithValue(ctx, outgoingCallKey{}, &calls), &calls
+}
+
 // Config holds configuration for the Httrace middleware.
 type Config struct {
 	// APIKey is your Httrace API key — required.
@@ -61,6 +159,10 @@ type Config struct {
 
 	// Endpoint overrides the default Httrace API endpoint (useful for self-hosted).
 	Endpoint string
+
+	// CaptureOutgoing enables recording of outgoing HTTP calls made during a request.
+	// Use ClientFromContext(r.Context()) to obtain an instrumented *http.Client.
+	CaptureOutgoing bool
 }
 
 // Middleware returns an http.Handler middleware that captures traffic.
@@ -84,6 +186,8 @@ func Middleware(cfg Config) func(http.Handler) http.Handler {
 
 	c := newClient(cfg.APIKey, cfg.Endpoint)
 
+	captureOutgoing := cfg.CaptureOutgoing
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if exclude[r.URL.Path] || rand.Float64() >= cfg.SampleRate {
@@ -95,17 +199,25 @@ func Middleware(cfg Config) func(http.Handler) http.Handler {
 			reqBody, _ := io.ReadAll(r.Body)
 			r.Body = io.NopCloser(bytes.NewReader(reqBody))
 
+			// Optionally activate outgoing call capture for this request
+			var outgoingCalls *[]OutgoingCall
+			if captureOutgoing {
+				ctx, calls := contextWithOutgoingCapture(r.Context())
+				r = r.WithContext(ctx)
+				outgoingCalls = calls
+			}
+
 			rw := &responseRecorder{ResponseWriter: w, statusCode: 200}
 			tStart := time.Now()
 			next.ServeHTTP(rw, r)
 			latency := time.Since(tStart).Seconds() * 1000
 
-			go record(c, cfg.Service, r, reqBody, rw, latency)
+			go record(c, cfg.Service, r, reqBody, rw, latency, outgoingCalls)
 		})
 	}
 }
 
-func record(c *client, service string, r *http.Request, reqBody []byte, rw *responseRecorder, latency float64) {
+func record(c *client, service string, r *http.Request, reqBody []byte, rw *responseRecorder, latency float64, outgoingCalls *[]OutgoingCall) {
 	defer func() { recover() }()
 
 	query := make(map[string]string)
@@ -113,6 +225,11 @@ func record(c *client, service string, r *http.Request, reqBody []byte, rw *resp
 		if len(v) > 0 {
 			query[k] = v[0]
 		}
+	}
+
+	var outgoing []OutgoingCall
+	if outgoingCalls != nil {
+		outgoing = *outgoingCalls
 	}
 
 	interaction := map[string]interface{}{
@@ -132,6 +249,7 @@ func record(c *client, service string, r *http.Request, reqBody []byte, rw *resp
 			"body":        sanitize(parseBody(rw.body.Bytes(), rw.Header().Get("Content-Type"))),
 			"latency_ms":  latency,
 		},
+		"outgoing_calls": outgoing,
 	}
 
 	c.enqueue(interaction)
