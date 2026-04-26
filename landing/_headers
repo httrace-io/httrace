@@ -1,0 +1,22 @@
+/*
+  # Prevent clickjacking
+  X-Frame-Options: DENY
+  # Prevent MIME sniffing
+  X-Content-Type-Options: nosniff
+  # Force HTTPS
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  # Referrer policy — don't leak URL to third parties
+  Referrer-Policy: strict-origin-when-cross-origin
+  # Permissions policy — disable unused browser APIs
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  # Content Security Policy
+  # unsafe-inline required for inline <script> and <style> blocks used throughout
+  # Update to nonce-based CSP when moving to a server-rendered approach
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://plausible.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://api.httrace.com https://plausible.io; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'
+
+/dashboard.html
+  # Stricter CSP for authenticated dashboard — no external scripts except fonts
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.httrace.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
+
+/login.html
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://api.httrace.com; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'

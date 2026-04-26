@@ -64,6 +64,13 @@ type OutgoingCall struct {
 
 var sensitiveURLParamRe = regexp.MustCompile(`(?i)api[-_]?key|apikey|token|secret|auth|password|passwd|credential|access[-_]?token`)
 
+// Client-side PII patterns — mirror the Python SDK's value-level detection.
+var (
+	piiEmailRe = regexp.MustCompile(`\b[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}\b`)
+	piiCardRe  = regexp.MustCompile(`\b(?:\d[ \-]?){13,16}\b`)
+	piiJWTRe   = regexp.MustCompile(`eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+`)
+)
+
 func sanitizeOutgoingURL(rawURL string) string {
 	parsed, err := url.Parse(rawURL)
 	if err != nil {
@@ -306,7 +313,11 @@ func parseBody(raw []byte, ct string) interface{} {
 func sanitize(val interface{}) interface{} {
 	switch v := val.(type) {
 	case string:
-		return v // simple strings pass through (PII patterns handled server-side)
+		// Apply client-side PII scrubbing before data leaves the server.
+		s := piiEmailRe.ReplaceAllString(v, "[EMAIL]")
+		s = piiCardRe.ReplaceAllString(s, "[CARD]")
+		s = piiJWTRe.ReplaceAllString(s, "[JWT]")
+		return s
 	case map[string]interface{}:
 		out := make(map[string]interface{}, len(v))
 		for k, vv := range v {
