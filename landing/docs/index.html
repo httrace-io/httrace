@@ -165,6 +165,9 @@
     <a href="#django" class="sidebar-link">Django</a>
     <a href="#flask" class="sidebar-link">Flask</a>
     <a href="#starlette" class="sidebar-link">Starlette</a>
+    <a href="#express" class="sidebar-link">Express (Node.js)</a>
+    <a href="#go-framework" class="sidebar-link">Go (net/http · Gin)</a>
+    <a href="#rails" class="sidebar-link">Rails / Rack (Ruby)</a>
 
     <div class="sidebar-section" style="margin-top:20px">Features</div>
     <a href="#test-formats" class="sidebar-link">Test formats</a>
@@ -187,7 +190,7 @@
     <div>
       <span class="badge badge-green">v0.2.0</span>&nbsp;
       <span class="badge badge-blue">Python 3.9+</span>&nbsp;
-      <span class="badge badge-yellow">Private Beta</span>
+      <span class="badge badge-yellow">Open Beta</span>
     </div>
 
     <h1>Getting Started</h1>
@@ -197,11 +200,22 @@
     <h2 id="quickstart">Quickstart</h2>
     <p>You'll have your first auto-generated tests in under 5 minutes.</p>
 
-    <div class="step-row"><span class="step-number">1</span><strong>Install the package</strong></div>
-    <pre><span class="pr">$</span> <span class="ok">pip install httrace</span></pre>
+    <div class="step-row"><span class="step-number">1</span><strong>Install the SDK for your language</strong></div>
+    <pre><span class="cm"># Python</span>
+<span class="pr">$</span> <span class="ok">pip install httrace</span>
+
+<span class="cm"># Node.js / TypeScript</span>
+<span class="pr">$</span> <span class="ok">npm install httrace</span>
+
+<span class="cm"># Go</span>
+<span class="pr">$</span> <span class="ok">go get github.com/httrace-io/httrace-go</span>
+
+<span class="cm"># Ruby</span>
+<span class="pr">$</span> <span class="ok">gem install httrace</span></pre>
 
     <div class="step-row"><span class="step-number">2</span><strong>Add the middleware to your app</strong></div>
-    <pre><span class="kw">import</span> os
+    <pre><span class="cm"># Python (FastAPI shown — see Frameworks section for Django, Flask, Express, Go, Rails)</span>
+<span class="kw">import</span> os
 <span class="kw">from</span> httrace <span class="kw">import</span> <span class="fn">HttraceCaptureMiddleware</span>
 
 app.<span class="fn">add_middleware</span>(
@@ -226,11 +240,29 @@ app.<span class="fn">add_middleware</span>(
 
     <!-- INSTALLATION -->
     <h2 id="installation">Installation</h2>
-    <p>Httrace requires Python 3.9 or higher. It's published on PyPI:</p>
+    <p>All SDKs are open-source (MIT) and require no broker, sidecar, or infrastructure changes.</p>
+
+    <h3>Python (3.9+)</h3>
     <pre><span class="pr">$</span> pip install httrace
 <span class="cm"># or with uv:</span>
 <span class="pr">$</span> uv add httrace</pre>
-    <p>The SDK has minimal dependencies: <code>httpx</code> for async uploads and <code>anyio</code> for background threads. No additional broker or sidecar is required.</p>
+    <p>Minimal dependencies: <code>httpx</code> for async uploads, <code>anyio</code> for background threads. Supports FastAPI, Django, Flask, and Starlette.</p>
+
+    <h3>Node.js / TypeScript</h3>
+    <pre><span class="pr">$</span> npm install httrace
+<span class="cm"># or:</span>
+<span class="pr">$</span> yarn add httrace</pre>
+    <p>Supports Express and any Node.js HTTP framework. Uses <code>AsyncLocalStorage</code> for per-request isolation.</p>
+
+    <h3>Go (1.18+)</h3>
+    <pre><span class="pr">$</span> go get github.com/httrace-io/httrace-go</pre>
+    <p>Works with <code>net/http</code>, Gin, Echo, and chi. Uses idiomatic <code>context.Context</code> propagation — no global state.</p>
+
+    <h3>Ruby (2.7+)</h3>
+    <pre><span class="pr">$</span> gem install httrace
+<span class="cm"># or add to Gemfile:</span>
+gem <span class="st">'httrace'</span></pre>
+    <p>Works with Rails, Rack, and Sinatra. Uses <code>Thread.current</code> for per-request isolation — safe under Puma and other threaded servers.</p>
 
     <!-- MIDDLEWARE -->
     <h2 id="middleware">Add middleware</h2>
@@ -280,8 +312,8 @@ app.<span class="fn">add_middleware</span>(
 
 Options:
   --service TEXT      Service name to generate for (default: all)
-  --output PATH       Output directory (default: ./tests/)
-  --framework TEXT    Test framework: pytest | jest | rspec (default: pytest)
+  --format TEXT       pytest | jest | vitest | go | rspec  (default: pytest)
+  --output PATH       Output directory (default: ./tests/integration)
   --min-requests INT  Min captured requests per endpoint to generate a test (default: 3)
   --dry-run           Preview output without writing files</pre>
 
@@ -439,6 +471,80 @@ app <span class="pr">=</span> <span class="fn">Starlette</span>(middleware<span 
     <span class="fn">Middleware</span>(<span class="fn">HttraceCaptureMiddleware</span>,
         api_key<span class="pr">=</span>os.environ[<span class="st">"HTTRACE_API_KEY"</span>], service<span class="pr">=</span><span class="st">"my-api"</span>),
 ])</pre>
+
+    <h2 id="express">Express (Node.js)</h2>
+    <p>Works with Express 4/5 and any Node.js HTTP framework. Install via npm:</p>
+    <pre><span class="pr">$</span> npm install httrace</pre>
+    <pre><span class="kw">const</span> express = <span class="fn">require</span>(<span class="st">'express'</span>);
+<span class="kw">const</span> httrace = <span class="fn">require</span>(<span class="st">'httrace'</span>);
+
+<span class="kw">const</span> app = <span class="fn">express</span>();
+
+app.<span class="fn">use</span>(<span class="fn">httrace</span>({
+  apiKey:  process.env.HTTRACE_API_KEY,
+  service: <span class="st">'my-api'</span>,
+  sampleRate: <span class="nu">0.1</span>,
+}));</pre>
+    <p>To capture outgoing HTTP calls (for dependency mock generation):</p>
+    <pre>app.<span class="fn">use</span>(<span class="fn">httrace</span>({
+  apiKey:          process.env.HTTRACE_API_KEY,
+  service:         <span class="st">'my-api'</span>,
+  captureOutgoing: <span class="kw">true</span>,   <span class="cm">// patches http.request / https.request</span>
+}));</pre>
+    <div class="callout">
+      <strong>TypeScript:</strong> The package ships with full TypeScript types. Import as <code>import httrace from 'httrace'</code>.
+    </div>
+
+    <h2 id="go-framework">Go (net/http · Gin · Echo)</h2>
+    <p>Install the Go module:</p>
+    <pre><span class="pr">$</span> go get github.com/httrace-io/httrace-go</pre>
+
+    <h3>net/http</h3>
+    <pre><span class="kw">import</span> <span class="st">"github.com/httrace-io/httrace-go/httrace"</span>
+
+cfg := httrace.<span class="fn">Config</span>{
+    APIKey:  os.<span class="fn">Getenv</span>(<span class="st">"HTTRACE_API_KEY"</span>),
+    Service: <span class="st">"my-api"</span>,
+    SampleRate: <span class="nu">0.1</span>,
+}
+
+http.<span class="fn">ListenAndServe</span>(<span class="st">":8080"</span>, httrace.<span class="fn">Middleware</span>(cfg)(mux))</pre>
+
+    <h3>Gin</h3>
+    <pre>r := gin.<span class="fn">Default</span>()
+r.<span class="fn">Use</span>(httrace.<span class="fn">GinMiddleware</span>(cfg))
+r.<span class="fn">Run</span>(<span class="st">":8080"</span>)</pre>
+
+    <p>For outgoing HTTP capture, retrieve the recording <code>*http.Client</code> from context:</p>
+    <pre>client := httrace.<span class="fn">ClientFromContext</span>(r.Context())
+resp, err := client.<span class="fn">Get</span>(<span class="st">"https://api.stripe.com/..."</span>)</pre>
+
+    <h2 id="rails">Rails / Rack (Ruby)</h2>
+    <p>Install via Bundler:</p>
+    <pre>gem <span class="st">'httrace'</span>  <span class="cm"># Gemfile</span></pre>
+
+    <h3>Rails</h3>
+    <p>Add to <code>config/application.rb</code>:</p>
+    <pre><span class="kw">require</span> <span class="st">'httrace'</span>
+
+config.middleware.<span class="fn">use</span> Httrace::CaptureMiddleware,
+  api_key:     ENV[<span class="st">'HTTRACE_API_KEY'</span>],
+  service:     <span class="st">'my-api'</span>,
+  sample_rate: <span class="nu">0.1</span></pre>
+
+    <p>To capture ActiveRecord SQL queries alongside requests:</p>
+    <pre>config.middleware.<span class="fn">use</span> Httrace::CaptureMiddleware,
+  api_key:         ENV[<span class="st">'HTTRACE_API_KEY'</span>],
+  service:         <span class="st">'my-api'</span>,
+  capture_outgoing: <span class="kw">true</span>,
+  capture_db:       <span class="kw">true</span>   <span class="cm"># Rails only — instruments ActiveRecord</span></pre>
+
+    <h3>Sinatra / plain Rack</h3>
+    <pre><span class="kw">require</span> <span class="st">'httrace'</span>
+
+use Httrace::CaptureMiddleware,
+  api_key: ENV[<span class="st">'HTTRACE_API_KEY'</span>],
+  service: <span class="st">'my-api'</span></pre>
 
     <!-- TEST FORMATS -->
     <h2 id="test-formats">Test Formats</h2>
