@@ -1220,10 +1220,10 @@
     <div class="hero-inner">
       <div class="hero-badge fade-up">
         <span class="hero-badge-dot"></span>
-        Now in private beta — <span id="waitlist-count-badge">loading...</span>
+        Open beta — <span id="waitlist-count-badge">now accepting signups</span>
       </div>
       <h1 class="hero-title fade-up delay-1">Your users write<br>your tests.</h1>
-      <p class="hero-sub fade-up delay-2">Httrace captures real production traffic and automatically generates integration tests — without you writing a single line.</p>
+      <p class="hero-sub fade-up delay-2">Httrace captures real production traffic and automatically generates integration tests — without you writing a single line. Works with Python, Node.js, Go, and Ruby.</p>
       <div class="hero-actions fade-up delay-3">
         <a href="#waitlist" class="btn-primary">Get your free API key →</a>
         <a href="#how" class="btn-secondary">See how it works ↓</a>
@@ -1393,9 +1393,12 @@
       <div class="step fade-up delay-1">
         <div class="step-num">01</div>
         <h3>Install</h3>
-        <p>Add Httrace to your Python project. One package, one line of code.</p>
-        <div class="step-code">
-          <span class="prompt">$</span> <span class="cmd">pip install httrace</span>
+        <p>Works with Python, Node.js, Go, and Ruby. One package, one line of code.</p>
+        <div class="step-code" style="font-size:12px;line-height:2">
+          <span class="prompt">$</span> <span class="cmd">pip install httrace</span> <span class="arg"># Python</span><br>
+          <span class="prompt">$</span> <span class="cmd">npm install httrace</span> <span class="arg"># Node.js</span><br>
+          <span class="prompt">$</span> <span class="cmd">go get github.com/httrace-io/httrace-go</span> <span class="arg"># Go</span><br>
+          <span class="prompt">$</span> <span class="cmd">gem install httrace</span> <span class="arg"># Ruby</span>
         </div>
       </div>
       <div class="step fade-up delay-2">
@@ -1449,8 +1452,8 @@
         <div class="setup-step active" data-panel="p1">
           <div class="setup-step-num">1</div>
           <div class="setup-step-content">
-            <h4>Join the waitlist — get your API key</h4>
-            <p>After signing up, you receive a personal <code style="color:var(--accent);font-family:var(--font-mono);font-size:12px">ht_</code> API key via email. It identifies your account and tracks your monthly usage against your plan.</p>
+            <h4>Sign up — get your API key instantly</h4>
+            <p>After creating your account, you receive a personal <code style="color:var(--accent);font-family:var(--font-mono);font-size:12px">ht_</code> API key. It identifies your account and tracks your monthly usage against your plan.</p>
           </div>
         </div>
         <div class="setup-step" data-panel="p2">
@@ -1655,14 +1658,14 @@
           </tr>
           <tr>
             <td>Dependency mocks auto-generated</td>
-            <td class="col-httrace"><span class="check">✓</span></td>
+            <td class="col-httrace"><span class="partial">In progress</span></td>
             <td><span class="check">✓</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="cross">✕</span></td>
           </tr>
           <tr>
             <td>Tests run without infrastructure</td>
-            <td class="col-httrace"><span class="check">✓</span></td>
+            <td class="col-httrace"><span class="partial">In progress</span></td>
             <td><span class="check">✓</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="cross">✕</span></td>
@@ -1711,7 +1714,7 @@
           </tr>
           <tr>
             <td>VS Code extension</td>
-            <td class="col-httrace"><span class="check">✓</span></td>
+            <td class="col-httrace"><span class="partial">Planned</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="cross">✕</span></td>
             <td><span class="cross">✕</span></td>
@@ -1951,15 +1954,15 @@
       <div class="stats-row">
         <div class="stat">
           <div class="stat-value">€2.3B</div>
-          <div class="stat-label">Global testing tools<br>market size</div>
+          <div class="stat-label">Global testing tools<br>market size <span style="font-size:10px;color:var(--text-muted)">(Grand View Research, 2024)</span></div>
         </div>
         <div class="stat" style="border-left:1px solid var(--border);border-right:1px solid var(--border)">
           <div class="stat-value">38%</div>
-          <div class="stat-label">Teams already using production<br>telemetry for test insight</div>
+          <div class="stat-label">Teams using production telemetry<br>for test insight <span style="font-size:10px;color:var(--text-muted)">(State of Testing, 2024)</span></div>
         </div>
         <div class="stat">
           <div class="stat-value">8h</div>
-          <div class="stat-label">Average dev time per week<br>spent writing tests</div>
+          <div class="stat-label">Average dev time per week<br>spent writing tests <span style="font-size:10px;color:var(--text-muted)">(Stack Overflow Dev Survey, 2024)</span></div>
         </div>
       </div>
       <p class="investor-p">Manual test writing is the last major bottleneck in modern CI/CD. Httrace eliminates it by treating your production traffic as ground truth. Every real user interaction becomes a test — permanently.</p>
@@ -2133,11 +2136,11 @@
       const badge = document.getElementById('waitlist-count-badge');
       const footer = document.getElementById('waitlist-count-footer');
       if (count >= 1) {
-        badge.textContent = `${count}+ developers on waitlist`;
-        footer.textContent = `${count}+ developers`;
+        badge.textContent = `${count}+ developers building`;
+        footer.textContent = `${count}+`;
       } else {
         badge.textContent = 'now accepting signups';
-        footer.textContent = 'developers';
+        footer.textContent = 'early';
       }
     } catch {
       document.getElementById('waitlist-count-badge').textContent = 'now accepting signups';
