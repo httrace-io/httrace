@@ -42,7 +42,7 @@ No mocking. No guessing payloads. No maintaining test factories. The tests are b
 - **Free**: €0/month · 50,000 requests/month · 2 services · pytest + Jest · API drift detection · 7-day data retention
 - **Indie**: €15/month · 500,000 requests/month · 5 services · all 5 test formats · GitHub Actions · 30-day retention
 - **Startup**: €59/month · 3M requests/month · 15 services · all formats · Slack/email alerts · replay testing · 90-day retention
-- **Business**: €149/month · 10M requests/month · unlimited services · team/org features · priority support · 1-year retention
+- **Business**: €149/month · 15M requests/month · 50 services · team/org features · priority support · 90-day retention
 - **Enterprise**: from €499/month · unlimited · on-premise option · SSO/SAML · SLA · custom retention
 
 ## Quick start

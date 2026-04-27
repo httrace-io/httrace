@@ -900,6 +900,7 @@ const PLANS = [
       'All 5 test formats',
       'Dependency mocking',
       'OpenAPI export',
+      '2 team seats',
       '30-day data retention',
     ],
     available: false,
@@ -916,6 +917,7 @@ const PLANS = [
       '15 services',
       'All 5 test formats',
       'Dependency mocking',
+      'OpenAPI export',
       'Replay testing',
       'Slack & email alerts',
       '5 team seats',
@@ -936,6 +938,9 @@ const PLANS = [
       '50 services',
       'All 5 test formats',
       'Dependency mocking',
+      'OpenAPI export',
+      'Replay testing',
+      'Slack & email alerts',
       'PII compliance guarantee',
       '20 team seats',
       'Priority support',
@@ -1026,6 +1031,81 @@ function renderPlanGrid(currentPlan) {
     btn.textContent = `Upgrade to ${nextPlan.name} ↗`;
   } else if (btn) {
     btn.textContent = 'View plans ↗';
+  }
+}
+
+// ── Feature gating ────────────────────────────────────────────────────────────
+
+function _lockedBanner(featureName, minPlan) {
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                padding:48px 32px;gap:14px;text-align:center;">
+      <div style="font-size:28px">🔒</div>
+      <div style="font-family:var(--font-display);font-size:17px;font-weight:700;color:var(--text)">
+        ${featureName}
+      </div>
+      <div style="font-size:13px;color:var(--text-muted);max-width:320px;line-height:1.6">
+        Available on the <strong style="color:var(--accent)">${minPlan.charAt(0).toUpperCase() + minPlan.slice(1)}</strong> plan and above.
+      </div>
+      <button onclick="openUpgradeModal()"
+        style="background:var(--accent);color:#fff;border:none;border-radius:8px;
+               padding:10px 22px;font-family:var(--font-display);font-size:13px;
+               font-weight:700;cursor:pointer;margin-top:4px;">
+        Upgrade plan →
+      </button>
+    </div>`;
+}
+
+function applyFeatureGates(me) {
+  const f = me.features || {};
+  const plan = me.plan || 'free';
+
+  // Fix plan limits row to show accurate formats
+  const formatsAllowed = f.all_formats
+    ? 'pytest · Jest · Go · RSpec · Vitest'
+    : 'pytest · Jest';
+  const limitsRow = document.getElementById('plan-limits-row');
+  if (limitsRow) {
+    const svcCount = me.limits?.services ?? '2';
+    const reqCount = me.limits?.requests_per_month ?? '50K';
+    limitsRow.innerHTML = `
+      <span class="plan-limit-item"><span class="plan-limit-dot"></span>${escHtml(String(reqCount))} requests / month</span>
+      <span class="plan-limit-item"><span class="plan-limit-dot"></span>${escHtml(String(svcCount))} service${svcCount === '1' ? '' : 's'}</span>
+      <span class="plan-limit-item"><span class="plan-limit-dot"></span>${formatsAllowed}</span>
+      <span class="plan-limit-item"><span class="plan-limit-dot"></span>${plan === 'free' ? 'No credit card required' : 'Full access'}</span>
+    `;
+  }
+
+  // OpenAPI export button — only for Indie+
+  const openapiBtn = document.getElementById('openapi-btn');
+  if (openapiBtn) {
+    if (!f.openapi_export) {
+      openapiBtn.disabled = true;
+      openapiBtn.title = 'OpenAPI export requires Indie plan or above';
+    }
+  }
+
+  // Alerts section — show locked state for Free / Indie
+  if (!f.slack_alerts) {
+    const alertsSection = document.getElementById('alerts-section');
+    if (alertsSection) {
+      alertsSection.querySelector('.table-card').innerHTML =
+        _lockedBanner('Anomaly Alerts', 'startup');
+    }
+  }
+
+  // Teams section — show locked state for Free / Indie
+  if (!f.teams_orgs) {
+    const teamSection = document.getElementById('team-section');
+    if (teamSection) {
+      // Replace entire inner content (keep section header)
+      const existingContent = teamSection.querySelector('#orgs-list');
+      const createForm = teamSection.querySelector('#create-org-form');
+      const newOrgBtn = teamSection.querySelector('[onclick="showCreateOrgForm()"]');
+      if (existingContent) existingContent.innerHTML = _lockedBanner('Teams & Organisations', 'startup');
+      if (createForm) createForm.style.display = 'none';
+      if (newOrgBtn) newOrgBtn.style.display = 'none';
+    }
   }
 }
 
@@ -1592,15 +1672,7 @@ async function load() {
     // Plan upgrade grid
     renderPlanGrid(me.plan);
 
-    // Plan limits row under usage bar
-    if (me.limits) {
-      document.getElementById('plan-limits-row').innerHTML = `
-        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${escHtml(String(me.limits.requests_per_month))} requests / month</span>
-        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${escHtml(String(me.limits.services))} service${me.limits.services === '1' ? '' : 's'}</span>
-        <span class="plan-limit-item"><span class="plan-limit-dot"></span>pytest · Jest · Go · RSpec · Vitest</span>
-        <span class="plan-limit-item"><span class="plan-limit-dot"></span>${me.plan === 'free' ? 'No credit card required' : 'Full access'}</span>
-      `;
-    }
+    // Plan limits row is rendered by applyFeatureGates() below
 
     // API key — store real key, show masked by default
     _realApiKey = me.api_key;
@@ -1626,11 +1698,18 @@ async function load() {
     // Populate service selector for Coverage + Changes
     populateServiceSelector(capturesData.captures || [], testsData.tests || []);
 
-    // Load alerts
-    loadAlerts();
+    // Apply feature gates based on plan
+    applyFeatureGates(me);
 
-    // Load organisations
-    loadOrgs();
+    // Load alerts (only if plan allows)
+    if (me.features?.slack_alerts || me.features?.email_alerts) {
+      loadAlerts();
+    }
+
+    // Load organisations (only if plan allows)
+    if (me.features?.teams_orgs) {
+      loadOrgs();
+    }
 
     // Show content
     document.getElementById('loading').style.display = 'none';
