@@ -132,12 +132,13 @@ func (t *RecordingTransport) RoundTrip(req *http.Request) (*http.Response, error
 	return resp, err
 }
 
-// ClientFromContext returns an *http.Client whose transport records outgoing calls
-// into the per-request context. Use this client for any outgoing HTTP calls
-// you want to capture when CaptureOutgoing is enabled in the middleware.
+// ClientFromContext returns an *http.Client whose transport records outgoing calls.
+// Use this client for any outgoing HTTP calls you want httrace to capture.
+// IMPORTANT: pass the request context explicitly so calls are linked to the right request:
 //
 //	client := httrace.ClientFromContext(r.Context())
-//	resp, err := client.Get("https://api.stripe.com/...")
+//	req, _ := http.NewRequestWithContext(r.Context(), "GET", "https://api.stripe.com/...", nil)
+//	resp, err := client.Do(req)
 func ClientFromContext(ctx context.Context) *http.Client {
 	return &http.Client{
 		Transport: &RecordingTransport{Base: http.DefaultTransport},

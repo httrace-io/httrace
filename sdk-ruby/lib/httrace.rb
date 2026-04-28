@@ -221,6 +221,7 @@ module Httrace
         val
           .gsub(/\b[\w.+\-]+@[\w.\-]+\.\w{2,}\b/, '[EMAIL]')
           .gsub(/\b(?:\d[ \-]?){13,16}\b/, '[CARD]')
+          .gsub(/eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+/, '[JWT]')
       else
         val
       end
