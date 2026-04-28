@@ -62,3 +62,9 @@ sdk/
 # Build artifacts
 sdk-ruby/*.gem
 node_modules/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
