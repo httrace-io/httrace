@@ -868,6 +868,14 @@
     .setup-preview { position: static; }
   }
 
+  /* ── VIDEO RESPONSIVE ── */
+  .video-desktop { display: block; }
+  .video-mobile  { display: none !important; }
+  @media (max-width: 640px) {
+    .video-desktop { display: none !important; }
+    .video-mobile  { display: flex !important; }
+  }
+
   /* ── FOOTER ── */
   footer {
     background: var(--bg);
@@ -1321,7 +1329,9 @@
       <div class="label section-label">See it in action</div>
       <h2 class="section-title" style="margin-bottom: 0;">Watch how it works.</h2>
     </div>
-    <div class="fade-up" style="
+
+    <!-- Desktop: 16:9 -->
+    <div class="video-desktop fade-up" style="
       position: relative;
       border-radius: 16px;
       overflow: hidden;
@@ -1340,13 +1350,33 @@
         playsinline
         poster="og.png"
         style="width: 100%; height: 100%; display: block; object-fit: cover;"
-        onerror="this.style.display='none';document.getElementById('video-fallback').style.display='flex'"
+        onerror="this.closest('.video-desktop').style.display='none'"
       ></video>
-      <div id="video-fallback" style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:var(--bg-2)">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        <span style="color:var(--text-muted);font-size:14px;font-family:var(--font-mono)">Video coming soon</span>
+    </div>
+
+    <!-- Mobile: 9:16 — shown only on small screens -->
+    <div class="video-mobile fade-up" style="display: none; justify-content: center;">
+      <div style="
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid #1f1f1f;
+        box-shadow: 0 0 60px rgba(59,130,246,0.12), 0 24px 48px rgba(0,0,0,0.7);
+        background: #080808;
+        width: min(76vw, 320px);
+        aspect-ratio: 9/16;
+      ">
+        <video
+          id="promo-video-mobile"
+          src="httrace_tiktok_4k.mp4"
+          muted
+          loop
+          playsinline
+          style="width: 100%; height: 100%; display: block; object-fit: cover;"
+        ></video>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -2120,16 +2150,15 @@
   }
 
   // Play video only when scrolled into view
-  const promoVideo = document.getElementById('promo-video');
-  if (promoVideo) {
-    const videoObserver = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) promoVideo.play();
-        else promoVideo.pause();
-      });
-    }, { threshold: 0.3 });
-    videoObserver.observe(promoVideo);
-  }
+  // Auto-play both video variants when scrolled into view
+  [document.getElementById('promo-video'), document.getElementById('promo-video-mobile')]
+    .filter(Boolean)
+    .forEach(vid => {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) vid.play(); else vid.pause(); });
+      }, { threshold: 0.3 });
+      obs.observe(vid);
+    });
 
   // Waitlist form handlers
   const API_BASE = 'https://api.httrace.com';
