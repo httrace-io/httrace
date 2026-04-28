@@ -1,6 +1,6 @@
 {
   "name": "httrace",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Httrace Express/Node.js middleware — capture real traffic, auto-generate integration tests",
   "main": "src/index.js",
   "keywords": ["httrace", "testing", "middleware", "express", "integration-tests", "api", "traffic"],

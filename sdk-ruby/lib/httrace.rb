@@ -7,7 +7,7 @@ require 'thread'
 require 'stringio'
 
 module Httrace
-  VERSION = '0.1.0'
+  VERSION = '0.1.1'
   DEFAULT_ENDPOINT = 'https://api.httrace.com/v1/captures'
 
   SENSITIVE_URL_PARAM_RE = /api[-_]?key|apikey|token|secret|auth|password|passwd|credential|access[-_]?token/i
