@@ -102,7 +102,7 @@ nav {
 
 /* ── STAT CARDS ── */
 .stats-grid {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px;
+  display: grid; grid-template-columns: repeat(8, 1fr); gap: 1px;
   background: var(--border); border: 1px solid var(--border);
   border-radius: 12px; overflow: hidden; margin-bottom: 32px;
 }
@@ -214,9 +214,106 @@ tbody tr:hover td { background: rgba(255,255,255,0.02); }
 .skeleton { background: linear-gradient(90deg, var(--bg-3) 25%, var(--bg-4) 50%, var(--bg-3) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
 @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
+/* ── SEARCH ── */
+.search-wrap { display: flex; align-items: center; gap: 10px; }
+.search-input {
+  background: var(--bg-3); border: 1px solid var(--border-2);
+  border-radius: 6px; padding: 5px 10px; color: var(--text);
+  font-family: var(--font-m); font-size: 12px; width: 200px;
+  outline: none; transition: border-color 0.2s;
+}
+.search-input:focus { border-color: var(--accent); }
+.search-input::placeholder { color: var(--muted); }
+
+/* ── INLINE PLAN SELECT ── */
+.plan-select {
+  font-family: var(--font-m); font-size: 10px; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 3px 7px; border-radius: 20px;
+  border: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23666'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 6px center;
+  padding-right: 20px; transition: opacity 0.15s;
+}
+.plan-select:hover { opacity: 0.8; }
+.plan-select.plan-free     { background-color: rgba(255,255,255,0.06); color: var(--dim); }
+.plan-select.plan-indie    { background-color: rgba(59,130,246,0.12);  color: #60a5fa; }
+.plan-select.plan-startup  { background-color: rgba(34,197,94,0.12);   color: var(--green); }
+.plan-select.plan-business { background-color: rgba(245,158,11,0.12);  color: var(--yellow); }
+.plan-select.plan-enterprise { background-color: rgba(239,68,68,0.12); color: var(--red); }
+
+/* ── ORG CARDS ── */
+.org-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px; margin-bottom: 32px;
+}
+.org-card {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.org-card:hover { border-color: var(--border-2); }
+.org-card-head {
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.org-card-title { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.org-name { font-family: var(--font-d); font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.org-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.org-slug {
+  font-family: var(--font-m); font-size: 10px; color: var(--muted);
+  background: var(--bg-4); border: 1px solid var(--border);
+  padding: 2px 7px; border-radius: 4px;
+}
+.org-owner { font-size: 12px; color: var(--dim); }
+.org-date { font-family: var(--font-m); font-size: 10px; color: var(--muted); }
+.org-stats {
+  display: flex; gap: 12px; flex-shrink: 0; flex-direction: column; align-items: flex-end;
+}
+.org-members-section { padding: 14px 18px; }
+.org-members-label {
+  font-family: var(--font-m); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.org-members-label span { color: var(--dim); font-size: 11px; letter-spacing: 0; text-transform: none; }
+.org-member-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+}
+.org-member-row:last-child { border-bottom: none; }
+.org-member-avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--bg-4); border: 1px solid var(--border-2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-m); font-size: 9px; color: var(--dim);
+  flex-shrink: 0; text-transform: uppercase;
+}
+.org-member-email { font-size: 12px; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.role-chip {
+  font-family: var(--font-m); font-size: 9px; letter-spacing: 0.06em;
+  text-transform: uppercase; padding: 2px 6px; border-radius: 20px;
+  flex-shrink: 0;
+}
+.role-owner  { background: rgba(245,158,11,0.14); color: var(--yellow); }
+.role-admin  { background: rgba(59,130,246,0.12); color: #60a5fa; }
+.role-member { background: var(--bg-4); color: var(--muted); }
+.pending-chip {
+  font-family: var(--font-m); font-size: 9px; color: var(--muted);
+  background: var(--bg-4); border: 1px solid var(--border);
+  padding: 2px 6px; border-radius: 20px; flex-shrink: 0;
+}
+.org-footer {
+  padding: 10px 18px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 16px;
+  background: var(--bg-3);
+}
+.org-footer-stat { font-family: var(--font-m); font-size: 11px; color: var(--dim); }
+.org-footer-stat strong { color: var(--text); }
+
 @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(4, 1fr); } }
 @media (max-width: 900px)  { .two-col { grid-template-columns: 1fr; } .stats-grid { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 600px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); } .page { padding: 16px 16px 60px; } }
+@media (max-width: 600px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); } .page { padding: 16px 16px 60px; } .org-grid { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -258,6 +355,7 @@ tbody tr:hover td { background: rgba(255,255,255,0.02); }
       <div class="stat-card"><div class="stat-label">This month</div><div class="stat-value" id="s-month">—</div><div class="stat-sub" id="s-today-sub">— today</div></div>
       <div class="stat-card"><div class="stat-label">MRR</div><div class="stat-value yellow" id="s-mrr">—</div></div>
       <div class="stat-card"><div class="stat-label">Paid users</div><div class="stat-value" id="s-paid">—</div><div class="stat-sub">non-free plans</div></div>
+      <div class="stat-card"><div class="stat-label">Organisations</div><div class="stat-value" id="s-orgs">—</div><div class="stat-sub">active teams</div></div>
     </div>
 
     <!-- USERS + SIDEBAR -->
@@ -267,7 +365,10 @@ tbody tr:hover td { background: rgba(255,255,255,0.02); }
       <div class="card">
         <div class="card-header">
           <div class="card-title">Users</div>
-          <div class="card-count" id="user-count">—</div>
+          <div class="search-wrap">
+            <input class="search-input" id="user-search" type="text" placeholder="Search email…" oninput="filterUsers()">
+            <div class="card-count" id="user-count">—</div>
+          </div>
         </div>
         <div class="users-table-wrap">
           <table>
@@ -323,6 +424,14 @@ tbody tr:hover td { background: rgba(255,255,255,0.02); }
       </ul>
     </div>
 
+    <!-- TEAMS & ORGANISATIONS -->
+    <div class="section-header" style="margin-top:32px">Teams &amp; Organisations</div>
+    <div class="org-grid" id="org-grid">
+      <div class="org-card" style="grid-column:1/-1">
+        <div class="empty-state" style="padding:32px">Loading…</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -373,6 +482,7 @@ function loadAll() {
   loadStats();
   loadUsers();
   loadIssues();
+  loadOrgs();
   document.getElementById('last-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
 }
 
@@ -398,6 +508,7 @@ function loadStats() {
       document.getElementById('s-mrr').textContent      = '€' + d.mrr_eur;
       const paid = Object.entries(d.plan_breakdown).filter(([p]) => p !== 'free').reduce((a,[,v]) => a+v, 0);
       document.getElementById('s-paid').textContent     = fmt(paid);
+      document.getElementById('s-orgs').textContent     = fmt(d.total_orgs ?? 0);
 
       // Plan breakdown sidebar
       const plans = ['free','indie','startup','business','enterprise','starter','pro','growth'];
@@ -429,34 +540,154 @@ function loadStats() {
 
 // ── Users ─────────────────────────────────────────────────────────────────
 
+let _allUsers = [];
+
+function renderUsers(users) {
+  const maxCaptures = Math.max(1, ...users.map(u => u.captures_this_month));
+  const rows = users.map(u => {
+    const pct = Math.min(100, Math.round((u.captures_this_month / maxCaptures) * 100));
+    const planOpts = ['free','indie','startup','business','enterprise'].map(p =>
+      `<option value="${p}"${p === u.plan ? ' selected' : ''}>${p}</option>`
+    ).join('');
+    return `<tr data-email="${escHtml(u.email)}">
+      <td class="user-email">
+        ${u.has_password ? '<span class="dot-active" title="Has password"></span> ' : '<span class="dot-inactive" title="No password set"></span> '}
+        <a href="mailto:${escHtml(u.email)}">${escHtml(u.email)}</a>
+      </td>
+      <td>
+        <select class="plan-select plan-${escHtml(u.plan)}" data-email="${escHtml(u.email)}" onchange="changePlan(this)">
+          ${planOpts}
+        </select>
+      </td>
+      <td>
+        <div class="captures-bar-wrap">
+          <div class="captures-bar"><div class="captures-bar-fill" style="width:${pct}%"></div></div>
+          <span class="num">${fmt(u.captures_this_month)}</span>
+        </div>
+      </td>
+      <td><span class="num">${fmt(u.total_captures)}</span></td>
+      <td><span class="ts">${u.last_active ? relTime(u.last_active) : '—'}</span></td>
+      <td><span class="ts">${relTime(u.created_at)}</span></td>
+      <td><span style="color:${u.has_password ? 'var(--green)' : 'var(--muted)'};font-size:12px">${u.has_password ? '✓' : '—'}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('users-tbody').innerHTML = rows || '<tr><td colspan="7" class="empty-state">No users found</td></tr>';
+}
+
+function filterUsers() {
+  const q = (document.getElementById('user-search')?.value || '').toLowerCase();
+  const filtered = q ? _allUsers.filter(u => u.email.toLowerCase().includes(q)) : _allUsers;
+  renderUsers(filtered);
+}
+
 function loadUsers() {
   fetch(`${API}/v1/admin/users`, { headers: { 'x-admin-key': _adminKey } })
     .then(r => r.json())
     .then(d => {
+      _allUsers = d.users || [];
       document.getElementById('user-count').textContent = d.total + ' total';
-      const maxCaptures = Math.max(1, ...d.users.map(u => u.captures_this_month));
-      const rows = d.users.map(u => {
-        const pct = Math.min(100, Math.round((u.captures_this_month / maxCaptures) * 100));
-        const isRecent = u.last_active && (Date.now() - new Date(u.last_active).getTime()) < 7 * 86400_000;
-        return `<tr>
-          <td class="user-email">
-            ${u.has_password ? '<span class="dot-active" title="Has password"></span> ' : '<span class="dot-inactive" title="No password set"></span> '}
-            <a href="mailto:${escHtml(u.email)}">${escHtml(u.email)}</a>
-          </td>
-          <td><span class="plan-badge plan-${escHtml(u.plan)}">${escHtml(u.plan)}</span></td>
-          <td>
-            <div class="captures-bar-wrap">
-              <div class="captures-bar"><div class="captures-bar-fill" style="width:${pct}%"></div></div>
-              <span class="num">${fmt(u.captures_this_month)}</span>
+      renderUsers(_allUsers);
+    });
+}
+
+function changePlan(sel) {
+  const email = sel.dataset.email;
+  const newPlan = sel.value;
+  const oldPlan = sel.className.match(/plan-(\w+)/)?.[1];
+
+  // Optimistic UI
+  sel.className = `plan-select plan-${newPlan}`;
+
+  fetch(`${API}/v1/admin/users/${encodeURIComponent(email)}/plan`, {
+    method: 'PATCH',
+    headers: { 'x-admin-key': _adminKey, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ plan: newPlan }),
+  }).then(r => {
+    if (!r.ok) {
+      // Revert
+      sel.value = oldPlan;
+      sel.className = `plan-select plan-${oldPlan}`;
+      alert('Failed to update plan.');
+    } else {
+      // Update local cache too
+      const user = _allUsers.find(u => u.email === email);
+      if (user) user.plan = newPlan;
+    }
+  }).catch(() => {
+    sel.value = oldPlan;
+    sel.className = `plan-select plan-${oldPlan}`;
+    alert('Network error.');
+  });
+}
+
+// ── Organisations ─────────────────────────────────────────────────────────
+
+function loadOrgs() {
+  fetch(`${API}/v1/admin/orgs`, { headers: { 'x-admin-key': _adminKey } })
+    .then(r => r.json())
+    .then(d => {
+      const grid = document.getElementById('org-grid');
+      if (!d.orgs || d.orgs.length === 0) {
+        grid.innerHTML = '<div class="org-card" style="grid-column:1/-1"><div class="empty-state" style="padding:32px">No organisations yet</div></div>';
+        return;
+      }
+
+      const cards = d.orgs.map(org => {
+        const memberRows = org.members.map(m => {
+          const initials = m.email.slice(0, 2).toUpperCase();
+          const roleClass = `role-${m.role}`;
+          const status = m.accepted
+            ? `<span class="role-chip ${roleClass}">${escHtml(m.role)}</span>`
+            : `<span class="pending-chip">pending</span>`;
+          const when = m.accepted
+            ? (m.joined_at ? `joined ${relTime(m.joined_at)}` : '')
+            : (m.invited_at ? `invited ${relTime(m.invited_at)}` : '');
+          return `<div class="org-member-row">
+            <div class="org-member-avatar">${escHtml(initials)}</div>
+            <div class="org-member-email" title="${escHtml(m.email)}">${escHtml(m.email)}</div>
+            ${status}
+            <span style="font-family:var(--font-m);font-size:10px;color:var(--muted);flex-shrink:0">${escHtml(when)}</span>
+          </div>`;
+        }).join('');
+
+        const pendingBadge = org.pending_invites > 0
+          ? `<span style="font-family:var(--font-m);font-size:10px;color:var(--yellow);background:rgba(245,158,11,0.1);padding:2px 7px;border-radius:20px">${org.pending_invites} pending</span>`
+          : '';
+
+        return `<div class="org-card">
+          <div class="org-card-head">
+            <div class="org-card-title">
+              <div class="org-name">${escHtml(org.name)}</div>
+              <div class="org-meta">
+                <span class="org-slug">${escHtml(org.slug)}</span>
+                <span class="org-owner">${escHtml(org.owner_email)}</span>
+              </div>
             </div>
-          </td>
-          <td><span class="num">${fmt(u.total_captures)}</span></td>
-          <td><span class="ts">${u.last_active ? relTime(u.last_active) : '—'}</span></td>
-          <td><span class="ts">${relTime(u.created_at)}</span></td>
-          <td><span style="color:${u.has_password ? 'var(--green)' : 'var(--muted)'};font-size:12px">${u.has_password ? '✓' : '—'}</span></td>
-        </tr>`;
+            <div class="org-stats">
+              <span class="plan-badge plan-${escHtml(org.plan)}">${escHtml(org.plan)}</span>
+              <span class="org-date">${relTime(org.created_at)}</span>
+            </div>
+          </div>
+          <div class="org-members-section">
+            <div class="org-members-label">
+              Members
+              <span>${org.member_count} active</span>
+              ${pendingBadge}
+            </div>
+            ${memberRows || '<div style="font-size:12px;color:var(--muted)">No members</div>'}
+          </div>
+          <div class="org-footer">
+            <div class="org-footer-stat"><strong>${org.member_count}</strong> active members</div>
+            <div class="org-footer-stat"><strong>${org.api_key_count}</strong> API key${org.api_key_count !== 1 ? 's' : ''}</div>
+          </div>
+        </div>`;
       }).join('');
-      document.getElementById('users-tbody').innerHTML = rows || '<tr><td colspan="7" class="empty-state">No users yet</td></tr>';
+
+      grid.innerHTML = cards;
+    })
+    .catch(err => {
+      document.getElementById('org-grid').innerHTML =
+        '<div class="org-card" style="grid-column:1/-1"><div class="empty-state" style="padding:24px">Could not load organisations</div></div>';
     });
 }
 
